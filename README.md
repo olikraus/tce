@@ -1,2 +1,2 @@
-# tce
-tool chain editor
+# TCE
+Tool Chain Editor
