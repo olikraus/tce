@@ -27,9 +27,11 @@
 #include <stdio.h>
 
 
+GtkBuilder *builder; 
 GtkLabel *zoom_value;
 GtkScrollbar *da_h_scrollbar;
 GtkDrawingArea *da;
+GtkAboutDialog *aboutdialog;
 
 
 
@@ -119,15 +121,15 @@ void tcg_DrawTig(tcg_t *tcg, int idx, cairo_t *c)
 	y0 =  tgc_GetViewYFromGraph(tcg, tig->area.y0);
 	y1 =  tgc_GetViewYFromGraph(tcg, tig->area.y1);
 
-	printf("tcg_DrawTig: dx=%ld dy=%ld    x0=%ld x1=%ld y0=%ld y1=%ld    x0=%lf x1=%lf y0=%lf y1=%lf\n", tcg->tcgv->x, tcg->tcgv->y, tig->area.x0, tig->area.x1, tig->area.y0, tig->area.y1, x0, x1, y0, y1);
+	// printf("tcg_DrawTig: dx=%ld dy=%ld    x0=%ld x1=%ld y0=%ld y1=%ld    x0=%lf x1=%lf y0=%lf y1=%lf\n", tcg->tcgv->x, tcg->tcgv->y, tig->area.x0, tig->area.x1, tig->area.y0, tig->area.y1, x0, x1, y0, y1);
 	
 	if ( tcg_IsSelected(tcg, idx) )
 	{
-		cairo_set_source_rgb (c, 255, 0, 0);
+		cairo_set_source_rgb (c, 1.0, 0.0, 0.0);
 	}
 	else
 	{
-		cairo_set_source_rgb (c, 0, 255, 0);
+		cairo_set_source_rgb (c, 0, 0, 0);
 	}
 	
 	if ( tcg_IsCatched(tcg, idx) )
@@ -140,14 +142,14 @@ void tcg_DrawTig(tcg_t *tcg, int idx, cairo_t *c)
 	}
 	cairo_rectangle (c, x0, y0, x1-x0, y1-y0);
 	cairo_stroke (c);
-
+	cairo_set_source_rgb (c, 0.7, 0.7, 0.7);
+	cairo_rectangle (c, x0+1.0, y0+1.0, x1-x0-2.0, y1-y0-2.0);
+	cairo_fill(c);
 	
 	cairo_new_path(c);
 	cairo_select_font_face (c, "sans-serif",  CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
 	cairo_set_font_size (c, 10* tcg->tcgv->zoom);
-	//cairo_set_source_rgb (c, 0, 0, 0);
-	
-	
+	cairo_set_source_rgb (c, 0, 0, 0);
 	cairo_text_extents (c, "Test", &extents);
 	
 	/* center text within the area */
@@ -179,8 +181,8 @@ void tcg_RedrawAll(tcg_t *tcg, cairo_t *c)
 		// printf("catch area: x0=%lf x1=%lf y0=%lf y1=%lf\n", x0, x1, y0, y1);
 
 		
-		cairo_set_source_rgb (c, 0, 0, 0);
-		cairo_set_line_width (c, 1);
+		cairo_set_source_rgba (c, 1.0, 0.0, 0.0, 0.5);
+		cairo_set_line_width (c, 3);
 		cairo_new_path(c);
 		cairo_rectangle(c, x0, y0, x1-x0, y1-y0);
 		cairo_stroke (c);	
@@ -371,6 +373,12 @@ G_MODULE_EXPORT void on_da_configure_event(GtkWidget *w, GdkEvent  *e, gpointer 
 	/* draw event is also sent automatically */
 }
 
+G_MODULE_EXPORT void aboutdialog_activate (GtkMenuItem *w, gpointer d)
+{
+	gtk_widget_show (GTK_WIDGET(aboutdialog));
+	gtk_dialog_run (GTK_DIALOG(aboutdialog));
+	gtk_widget_hide (GTK_WIDGET(aboutdialog));
+}
 
 G_MODULE_EXPORT void on_window_destroy (GtkWidget *w, gpointer d)
 {
@@ -383,7 +391,6 @@ G_MODULE_EXPORT void on_window_destroy (GtkWidget *w, gpointer d)
 int main (int argc, char *argv[])
 {
 	tcg_t *tcg;
-	GtkBuilder      		*builder; 
 	GtkWidget       		*window;
 
 	gtk_init (&argc, &argv);
@@ -398,6 +405,7 @@ int main (int argc, char *argv[])
 	da_h_scrollbar = GTK_SCROLLBAR(gtk_builder_get_object (builder, "da_h_scrollbar"));
 	zoom_value = GTK_LABEL (gtk_builder_get_object (builder, "zoom_value"));
 	da = GTK_DRAWING_AREA (gtk_builder_get_object (builder, "da"));
+	aboutdialog = GTK_ABOUT_DIALOG (gtk_builder_get_object (builder, "aboutdialog"));
 	
 	/* is there a description of the event masks??? */
 	gtk_widget_add_events (GTK_WIDGET (da), GDK_ALL_EVENTS_MASK);
@@ -405,7 +413,7 @@ int main (int argc, char *argv[])
 	/* https://developer.gnome.org/gtk3/stable/GtkBuilder.html#gtk-builder-connect-signals */
 	gtk_builder_connect_signals (builder, tcg);
 
-	g_object_unref (G_OBJECT (builder));
+	/* g_object_unref (G_OBJECT (builder)); required later for the about dialog */
 
 	tcg_UpdateZoomValue(tcg);
 	tcg_UpdateScrollbar(tcg);

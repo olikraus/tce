@@ -566,6 +566,8 @@ static int tcg_handle_state_idle(tcg_t *tcg, int event , long x, long y)
 				}
 				else
 				{
+					tcg_DeselectAll(tcg);
+					tcg_Select(tcg, idx);
 					tcg->state = TCG_STATE_SINGLE_MOVE;
 				}				
 				r = 1;	/* catch area change */
@@ -717,7 +719,6 @@ static int tcg_handle_state_single_move(tcg_t *tcg, int event , long x, long y)
 			break;
 		case TCG_EVENT_MOUSE_MOVE:
 			tcg_SetCatchAreaToPoint(tcg, x, y);
-			tcg_DeselectAll(tcg);
 		
 			idx = tcg_GetElementOverPosition(tcg, tcg->start_x, tcg->start_y);
 			if ( idx < 0 )
@@ -728,7 +729,6 @@ static int tcg_handle_state_single_move(tcg_t *tcg, int event , long x, long y)
 			}
 			else
 			{		
-				tcg_Select(tcg, idx);
 				tcg_StartMove(tcg);
 				tcg_ApplyMove(tcg, x - tcg->start_x, y - tcg->start_y);
 				tcg->state = TCG_STATE_DO_MOVEMENT;
