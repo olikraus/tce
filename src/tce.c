@@ -32,7 +32,9 @@ GtkLabel *zoom_value;
 GtkScrollbar *da_h_scrollbar;
 GtkDrawingArea *da;
 GtkAboutDialog *aboutdialog;
-
+GtkMenu *da_popup;
+double da_popup_menu_x;
+double da_popup_menu_y;
 
 
 void box(GtkWidget *w, gdouble x, gdouble y)
@@ -193,6 +195,14 @@ void tcg_RedrawAll(tcg_t *tcg, cairo_t *c)
 /*==============================================================*/
 /* signal handler */
 
+
+G_MODULE_EXPORT void on_da_popup_new_activate (GtkMenuItem *menuitem, gpointer d)
+{
+	tcg_t *tcg = (tcg_t *)d;
+	tcg_AddTig(tcg, NULL,  tgc_GetGraphXFromView(tcg, da_popup_menu_x), tgc_GetGraphYFromView(tcg, da_popup_menu_y));
+	gtk_widget_queue_draw (GTK_WIDGET(da));	
+}
+
 G_MODULE_EXPORT gboolean on_da_motion_notify_event(GtkWidget *w, GdkEvent *e, gpointer d)
 {
 	guint32 time;
@@ -232,7 +242,23 @@ G_MODULE_EXPORT gboolean on_da_button_press_event(GtkWidget *w, GdkEvent *e, gpo
 	state = e->button.state;
 	button = e->button.button;
 
-	if ( button == 1 )
+	if ( button == 3 )
+	{
+		//gtk_widget_show (GTK_WIDGET(da_popup));
+		da_popup_menu_x = x;
+		da_popup_menu_y = y;
+		
+		gtk_menu_popup (da_popup,
+			NULL,
+			NULL,
+			NULL,
+			d,
+			button,
+			e->button.time);
+		
+
+	}
+	else if ( button == 1 )
 	{
 		if ( state & GDK_SHIFT_MASK )
 		{
@@ -276,8 +302,9 @@ G_MODULE_EXPORT gboolean on_da_button_release_event(GtkWidget *w, GdkEvent *e, g
 	if ( button == 3 )
 	{
 		
-		tcg_AddTig(tcg, NULL,  tgc_GetGraphXFromView(tcg, x), tgc_GetGraphYFromView(tcg, y));
-		gtk_widget_queue_draw (w);	/* force redraw , maybe better use gtk_widget_queue_draw_area() */
+		
+		//tcg_AddTig(tcg, NULL,  tgc_GetGraphXFromView(tcg, x), tgc_GetGraphYFromView(tcg, y));
+		//gtk_widget_queue_draw (w);	/* force redraw , maybe better use gtk_widget_queue_draw_area() */
 	}
 	else if ( button == 1 )
 	{
@@ -406,9 +433,11 @@ int main (int argc, char *argv[])
 	zoom_value = GTK_LABEL (gtk_builder_get_object (builder, "zoom_value"));
 	da = GTK_DRAWING_AREA (gtk_builder_get_object (builder, "da"));
 	aboutdialog = GTK_ABOUT_DIALOG (gtk_builder_get_object (builder, "aboutdialog"));
+	da_popup = GTK_MENU(gtk_builder_get_object (builder, "da_popup"));
 	
 	/* is there a description of the event masks??? */
-	gtk_widget_add_events (GTK_WIDGET (da), GDK_ALL_EVENTS_MASK);
+	// this can be set in glade
+	// gtk_widget_add_events (GTK_WIDGET (da), GDK_ALL_EVENTS_MASK);
 	
 	/* https://developer.gnome.org/gtk3/stable/GtkBuilder.html#gtk-builder-connect-signals */
 	gtk_builder_connect_signals (builder, tcg);
