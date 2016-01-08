@@ -21,13 +21,14 @@
 */
 
 
-#include "pl.h"
+#include "ps.h"
 
 /*========================================*/
 /* forward typedefs */
 
 typedef struct tcgv_struct tcgv_t;
 typedef struct tig_struct tig_t;
+typedef struct aig_struct aig_t;
 typedef struct tcg_struct tcg_t;
 typedef struct rect_struct rect_t;
 
@@ -59,10 +60,22 @@ struct tig_struct
 	unsigned int is_selected; /* tig is selected */
 };
 
+/* artefact in graph */
+struct aig_struct
+{
+	int eig_src;	/* element index (tig_list) source tool*/
+	int dir_src;	/* 0 right edge, 1 bottom edge, 2 left edge, 3 top edge */
+	
+	int eig_dest; 	/* element index (tig_list) destination tool */
+	int dir_dest;	/* 0 right edge, 1 bottom edge, 2 left edge, 3 top edge */	
+};
+
 /* the tool chain graph */
 struct tcg_struct
 {
-	pl_t *tig_list;
+	ps_t *tig_list;
+	
+	ps_t *aig_list;
 	/* dimensions of the graph */
 	rect_t graph_dimension;
 
@@ -75,7 +88,6 @@ struct tcg_struct
 	int state;
 	long start_x;	/* start position of the catch area or movement */
 	long start_y;
-	
 };
 
 #define TCG_STATE_IDLE 0
@@ -99,10 +111,15 @@ struct tcg_struct
 /*========================================*/
 /* tcg procedures */
 
-#define tcg_GetTIgCnt(tcg) pl_Cnt((tcg)->tig_list)
-#define tcg_WhileTig(tcg, idx) pl_While((tcg)->tig_list, (idx))
-#define tcg_GetTig(tcg, idx) ((tig_t *)pl_Get((tcg)->tig_list, (idx)))
-#define tcg_SetTig(tcg, idx, tig) (pl_Set((tcg)->tig_list, (idx), (void *)(tig)))
+#define tcg_GetTIgCnt(tcg) ps_Cnt((tcg)->tig_list)
+#define tcg_WhileTig(tcg, idx) ps_WhileLoop((tcg)->tig_list, (idx))
+#define tcg_GetTig(tcg, idx) ((tig_t *)ps_Get((tcg)->tig_list, (idx)))
+#define tcg_SetTig(tcg, idx, tig) (ps_Set((tcg)->tig_list, (idx), (void *)(tig)))
+
+#define tcg_GetAigCnt(tcg) ps_Cnt((tcg)->aig_list)
+#define tcg_WhileAig(tcg, idx) ps_WhileLoop((tcg)->aig_list, (idx))
+#define tcg_GetAig(tcg, idx) ((aig_t *)ps_Get((tcg)->aig_list, (idx)))
+#define tcg_SetAig(tcg, idx, aig) (ps_Set((tcg)->aig_list, (idx), (void *)(aig)))
 
 void tgc_CalculateDimension(tcg_t *tcg);
 long tgc_GetGraphXFromView(tcg_t *tcg, double x);
@@ -114,6 +131,7 @@ tcg_t *tcg_Open(void);
 void tcg_Close(tcg_t *tcg);
 void tcg_DeleteTig(tcg_t *tcg, int idx);
 int tcg_AddTig(tcg_t *tcg, const char *name, long x, long y);
+int tcg_AddAig(tcg_t *tcg, int eig_src, int dir_src, int eig_dest, int dir_dest);
 int tcg_CatchElement(tcg_t *tcg, double x, double y);
 int tcg_IsCatched(tcg_t *tcg, int idx);
 int tcg_IsSelected(tcg_t *tcg, int idx);

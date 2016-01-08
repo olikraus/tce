@@ -1,6 +1,8 @@
 /*
 	pl.h
 
+	(pointer list, currently obsolete, replaced by ps.h)
+
 	Tool Chain Editor
 	Copyright (C) 2016 olikraus@gmail.com
 

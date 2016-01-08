@@ -1,5 +1,7 @@
 /*
 	pl.c
+	
+	(pointer list, currently obsolete, replaced by ps.c)
 
 	Tool Chain Editor
 	Copyright (C) 2016 olikraus@gmail.com

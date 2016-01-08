@@ -418,12 +418,20 @@ G_MODULE_EXPORT void on_window_destroy (GtkWidget *w, gpointer d)
 int main (int argc, char *argv[])
 {
 	tcg_t *tcg;
+	
 	GtkWidget       		*window;
 
 	gtk_init (&argc, &argv);
 	
 	tcg = tcg_Open();
-	tcg_AddTig(tcg, "x", 20, 20);
+	{
+		int i1, i2;
+		i1 = tcg_AddTig(tcg, "x", 20, 20);
+		i2 = tcg_AddTig(tcg, "x", 70, 50);
+	
+		tcg_AddAig(tcg, i1, 0, i2, 3);
+	}
+
 
 	/* https://developer.gnome.org/gtk3/stable/GtkBuilder.html#gtk-builder-new-from-file */
 	builder = gtk_builder_new_from_file ("tce.glade");

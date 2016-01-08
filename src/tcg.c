@@ -228,6 +228,27 @@ void tig_FinishMove(tig_t *tig)
 	 /* nothing to do */
 }
 
+/*========================================*/
+
+aig_t *aig_Open(void)
+{
+	aig_t *aig;
+	aig = (aig_t *)malloc(sizeof(aig_t));
+	if ( aig != NULL )
+	{
+		aig->eig_src = -1;
+		aig->dir_src = 0;
+		aig->eig_dest = -1;
+		aig->dir_dest = 0;
+		return aig;
+	}
+	return NULL;
+}
+
+void aig_Close(aig_t *aig)
+{
+	free(aig);
+}
 
 /*========================================*/
 
@@ -285,13 +306,18 @@ tcg_t *tcg_Open(void)
 		tcg->tcgv = tcgv_Open(tcg);
 		if ( tcg->tcgv != NULL )
 		{
-			tcg->tig_list = pl_Open();
+			tcg->tig_list = ps_Open();
 			if ( tcg->tig_list != NULL )
 			{
-				tgc_CalculateDimension(tcg);
-				invalid_rectangle(&(tcg->catch_area));
-				tcg->state = TCG_STATE_IDLE;
-				return tcg;
+				tcg->aig_list = ps_Open();
+				if ( tcg->aig_list != NULL )
+				{
+					tgc_CalculateDimension(tcg);
+					invalid_rectangle(&(tcg->catch_area));
+					tcg->state = TCG_STATE_IDLE;
+					return tcg;
+				}
+				ps_Close(tcg->tig_list);
 			}
 			tcgv_Close(tcg->tcgv);
 		}
@@ -312,13 +338,30 @@ static void tcg_ClearTigList(tcg_t *tcg)
 		tig_Close(tig);
 		tcg_SetTig(tcg, i, NULL);
 	}
-	pl_Clear(tcg->tig_list);
+	ps_Clear(tcg->tig_list);
+}
+
+static void tcg_ClearAigList(tcg_t *tcg)
+{
+	int i;
+	aig_t *aig;
+	
+	i = -1;
+	while( tcg_WhileAig(tcg, &i) )
+	{
+		aig = tcg_GetAig(tcg, i);
+		aig_Close(aig);
+		tcg_SetAig(tcg, i, NULL);
+	}
+	ps_Clear(tcg->tig_list);
 }
 
 void tcg_Close(tcg_t *tcg)
 {
 	tcg_ClearTigList(tcg);
-	pl_Close(tcg->tig_list);
+	tcg_ClearAigList(tcg);
+	ps_Close(tcg->aig_list);
+	ps_Close(tcg->tig_list);
 	tcgv_Close(tcg->tcgv);
 	free(tcg);
 }
@@ -331,12 +374,30 @@ static int tcg_AddPlainTig(tcg_t *tcg)
 	tig = tig_Open(NULL);
 	if ( tig != NULL )
 	{
-		idx = pl_Add(tcg->tig_list, tig);
+		idx = ps_Add(tcg->tig_list, tig);
 		if ( idx >= 0 )
 		{
 			return idx;
 		}
 		tig_Close(tig);
+	}
+	return -1;
+}
+
+/* returns position or -1 */
+static int tcg_AddPlainAig(tcg_t *tcg)
+{
+	aig_t *aig;
+	int idx;
+	aig = aig_Open();
+	if ( aig != NULL )
+	{
+		idx = ps_Add(tcg->aig_list, aig);
+		if ( idx >= 0 )
+		{
+			return idx;
+		}
+		aig_Close(aig);
 	}
 	return -1;
 }
@@ -350,7 +411,7 @@ void tcg_DeleteTig(tcg_t *tcg, int idx)
 	if ( tig == NULL )
 		return;
 	tig_Close(tig);
-	pl_DelByPos(tcg->tig_list, idx);
+	ps_Del(tcg->tig_list, idx);
 }
 
 int tcg_AddTig(tcg_t *tcg, const char *name, long x, long y)
@@ -371,6 +432,22 @@ int tcg_AddTig(tcg_t *tcg, const char *name, long x, long y)
 			return idx;
 		}
 		tcg_DeleteTig(tcg, idx);
+	}
+	return -1;
+}
+
+int tcg_AddAig(tcg_t *tcg, int eig_src, int dir_src, int eig_dest, int dir_dest)
+{
+	int idx;
+	aig_t *aig;
+	idx = tcg_AddPlainAig(tcg);
+	if ( idx >= 0 )
+	{
+		aig = tcg_GetAig(tcg, idx);
+		aig->eig_src = eig_src;
+		aig->dir_src = dir_src;
+		aig->eig_dest = eig_dest;
+		aig->dir_dest = dir_dest;
 	}
 	return -1;
 }
@@ -522,7 +599,7 @@ void tcg_StartMove(tcg_t *tcg)
 		if ( tig->is_selected != 0 )
 			tig_StartMove(tig);
 	}
-	puts("tcg_StartMove");
+	// puts("tcg_StartMove");
 }
 
 void tcg_ApplyMove(tcg_t *tcg, long delta_x, long delta_y)
@@ -536,7 +613,7 @@ void tcg_ApplyMove(tcg_t *tcg, long delta_x, long delta_y)
 		if ( tig->is_selected != 0 )
 			tig_ApplyMove(tig, delta_x, delta_y);
 	}
-	printf("tcg_ApplyMove %ld %ld\n", delta_x, delta_y);
+	// printf("tcg_ApplyMove %ld %ld\n", delta_x, delta_y);
 }
 
 void tcg_FinalizeMove(tcg_t *tcg)
