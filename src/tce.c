@@ -429,7 +429,7 @@ int main (int argc, char *argv[])
 		i1 = tcg_AddTig(tcg, "x", 20, 20);
 		i2 = tcg_AddTig(tcg, "x", 70, 50);
 	
-		tcg_AddAig(tcg, i1, 0, i2, 3);
+		tcg_AddAig(tcg, i1, 0, i2, 0);
 	}
 
 

@@ -60,14 +60,36 @@ struct tig_struct
 	unsigned int is_selected; /* tig is selected */
 };
 
+/* degree of freedom variable */
+struct dfv_struct
+{
+	long v;		/* current value */
+	long min;	/* v >= min */
+	long max;	/* v <= max */
+};
+typedef struct dfv_struct dfv_t;
+
+
+
 /* artefact in graph */
+
+#define AIG_POINT_MAX 5
+#define AIG_DFV_MAX 3
 struct aig_struct
 {
 	int eig_src;	/* element index (tig_list) source tool*/
 	int dir_src;	/* 0 right edge, 1 bottom edge, 2 left edge, 3 top edge */
 	
 	int eig_dest; 	/* element index (tig_list) destination tool */
-	int dir_dest;	/* 0 right edge, 1 bottom edge, 2 left edge, 3 top edge */	
+	int dir_dest;	/* 0 right edge, 1 bottom edge, 2 left edge, 3 top edge */
+	
+	int dfv_cnt;				/* degree of freedom for this path, denotes also the number of elements in dfv_list */
+	dfv_t dfv_list[AIG_DFV_MAX];	/* independent variables and their ranges */
+	int dfv_ref_list[AIG_POINT_MAX*2]; /* -1 if the value in point_val_list is valid. otherwise index into dfv_list */
+
+	int point_val_cnt;	/* number of points, between 0 and AIG_POINT_MAX-1 */
+	long point_val_list[AIG_POINT_MAX*2]; /* even: x, odd: y... not required???? */
+	
 };
 
 /* the tool chain graph */
@@ -132,6 +154,9 @@ void tcg_Close(tcg_t *tcg);
 void tcg_DeleteTig(tcg_t *tcg, int idx);
 int tcg_AddTig(tcg_t *tcg, const char *name, long x, long y);
 int tcg_AddAig(tcg_t *tcg, int eig_src, int dir_src, int eig_dest, int dir_dest);
+void tcg_CalculateAigPath(tcg_t *tcg, int idx);
+void tcg_ShowAigPoints(tcg_t *tcg, int aig_idx);
+
 int tcg_CatchElement(tcg_t *tcg, double x, double y);
 int tcg_IsCatched(tcg_t *tcg, int idx);
 int tcg_IsSelected(tcg_t *tcg, int idx);
