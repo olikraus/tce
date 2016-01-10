@@ -246,16 +246,19 @@ aig_t *aig_Open(void)
 		for( i = 0; i <  AIG_DFV_MAX; i++ )
 		{
 			aig->dfv_list[i].v = 0;
+			aig->dfv_list[i].is_vertical = 0;
 			aig->dfv_list[i].min = 0;
 			aig->dfv_list[i].max = 0;
 		}
 
+		/*
 		aig->point_val_cnt = 0;
 		for( i = 0; i <  AIG_POINT_MAX*2; i++ )
 		{
 			aig->point_val_list[i] = 0;
 			aig->dfv_ref_list[i] = -1;
-		}		
+		}
+		*/		
 		return aig;
 	}
 	return NULL;
@@ -453,7 +456,7 @@ int tcg_AddTig(tcg_t *tcg, const char *name, long x, long y)
 }
 
 
-int tcg_AddAig(tcg_t *tcg, int eig_src, int dir_src, int eig_dest, int dir_dest)
+int tcg_AddAig(tcg_t *tcg, int eig_src, int dir_src, int pos_src, int eig_dest, int dir_dest, int pos_dest)
 {
 	int idx;
 	aig_t *aig;
@@ -461,10 +464,15 @@ int tcg_AddAig(tcg_t *tcg, int eig_src, int dir_src, int eig_dest, int dir_dest)
 	if ( idx >= 0 )
 	{
 		aig = tcg_GetAig(tcg, idx);
+		
 		aig->eig_src = eig_src;
 		aig->dir_src = dir_src;
+		aig->pos_src = pos_src;
+		
 		aig->eig_dest = eig_dest;
 		aig->dir_dest = dir_dest;
+		aig->pos_dest = pos_dest;
+		
 		tcg_CalculateAigPath(tcg, idx);
 		tcg_ShowAigPoints(tcg, idx);
 

@@ -156,3 +156,59 @@ long tcg_GetConnectPosY(tcg_t *tcg, int idx, int dir, int pos)
 	
 }
 
+/*
+	checks, whether the connector at "dir" and "pos" is catched
+	tcg_IsCatched(tcg, idx) should also return 1 (however, this is not checked here)
+
+	additionally, this check should not be executed if tcg_IsCatchAreaVisible(tcg) returns true
+*/
+int tcg_IsConnectCatched(tcg_t *tcg, int idx, int dir, int pos)
+{
+	rect_t c;
+	
+	c.x0 = tcg_GetConnectPosX(tcg, idx, dir, pos);
+	c.y0 = tcg_GetConnectPosY(tcg, idx, dir, pos);
+	c.x1 = c.x0;
+	c.y1 = c.y0;
+	c.x0-=TCG_CONNECT_HALF_WIDTH;
+	c.y0-=TCG_CONNECT_HALF_WIDTH;
+	c.x1+=TCG_CONNECT_HALF_WIDTH;
+	c.y1+=TCG_CONNECT_HALF_WIDTH;
+	
+	return is_rectangle_intersection(&c, &(tcg->catch_area));
+}
+
+/*
+	find a catched connector
+	return 0 if no connector was found
+	This function will always return 0 if tcg_IsCatchAreaVisible(tcg) is active (multi catch)
+
+*/
+int tcg_GetCatchedConnect(tcg_t *tcg, int idx, int *dir_p, int *pos_p)
+{
+	int dir;
+	int pos;
+	int cnt;
+	
+	if ( tcg_IsCatchAreaVisible(tcg)  != 0 )
+		return 0;		/* do not catch a connector in multi catch mode */
+	
+	if ( tcg_IsCatched(tcg, idx) == 0 )
+		return 0;		/* master element is not chatched */
+	
+	for( dir = 0; dir < 4; dir++ )
+	{
+		cnt = tcg_GetConnectCnt(tcg, idx, dir);
+		for ( pos = 0; pos < cnt; pos++ )
+		{
+			if ( tcg_IsConnectCatched(tcg, idx, dir, pos) != 0 )
+			{
+				*dir_p = dir;
+				*pos_p = pos;
+				return 1;
+			}
+		}
+	}	
+	return 0;
+}
+

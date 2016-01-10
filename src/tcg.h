@@ -64,8 +64,9 @@ struct tig_struct
 struct dfv_struct
 {
 	long v;		/* current value */
-	long min;	/* v >= min */
-	long max;	/* v <= max */
+	long min;	/* v >= min, OBSOLETE */
+	long max;	/* v <= max, OBSOLETE */
+	int is_vertical;
 };
 typedef struct dfv_struct dfv_t;
 
@@ -79,16 +80,21 @@ struct aig_struct
 {
 	int eig_src;	/* element index (tig_list) source tool*/
 	int dir_src;	/* 0 right edge, 1 bottom edge, 2 left edge, 3 top edge */
+	int pos_src;	/* position number of the connector */
 	
 	int eig_dest; 	/* element index (tig_list) destination tool */
 	int dir_dest;	/* 0 right edge, 1 bottom edge, 2 left edge, 3 top edge */
+	int pos_dest;	/* position number of the connector */
 	
 	int dfv_cnt;				/* degree of freedom for this path, denotes also the number of elements in dfv_list */
+							/* number of points is dfv_cnt +1, number of segments is dfv_cnt +2 */
 	dfv_t dfv_list[AIG_DFV_MAX];	/* independent variables and their ranges */
-	int dfv_ref_list[AIG_POINT_MAX*2]; /* -1 if the value in point_val_list is valid. otherwise index into dfv_list */
+	
+	
+	//int dfv_ref_list[AIG_POINT_MAX*2]; /* -1 if the value in point_val_list is valid. otherwise index into dfv_list */
 
-	int point_val_cnt;	/* number of points, between 0 and AIG_POINT_MAX-1 */
-	long point_val_list[AIG_POINT_MAX*2]; /* even: x, odd: y... not required???? */
+	//int point_val_cnt;	/* number of points, between 0 and AIG_POINT_MAX-1 */
+	//long point_val_list[AIG_POINT_MAX*2]; /* even: x, odd: y... not required???? */
 	
 };
 
@@ -141,6 +147,7 @@ long tig_GetHeight(tig_t *tig);
 /* tcg procedures */
 
 #define TCG_CONNECT_GRID_SIZE 6
+#define TCG_CONNECT_HALF_WIDTH 2
 
 
 #define tcg_GetTIgCnt(tcg) ps_Cnt((tcg)->tig_list)
@@ -163,9 +170,7 @@ tcg_t *tcg_Open(void);
 void tcg_Close(tcg_t *tcg);
 void tcg_DeleteTig(tcg_t *tcg, int idx);
 int tcg_AddTig(tcg_t *tcg, const char *name, long x, long y);
-int tcg_AddAig(tcg_t *tcg, int eig_src, int dir_src, int eig_dest, int dir_dest);
-void tcg_CalculateAigPath(tcg_t *tcg, int idx);
-void tcg_ShowAigPoints(tcg_t *tcg, int aig_idx);
+int tcg_AddAig(tcg_t *tcg, int eig_src, int dir_src, int pos_src, int eig_dest, int dir_dest, int pos_dest);
 
 int tcg_CatchElement(tcg_t *tcg, double x, double y);
 int tcg_IsCatched(tcg_t *tcg, int idx);
@@ -179,5 +184,8 @@ int tcg_GetConnectCnt(tcg_t *tcg, int idx, int dir);
 long tcg_GetConnectDeltaPos(tcg_t *tcg, int idx, int dir, int pos);
 long tcg_GetConnectPosX(tcg_t *tcg, int idx, int dir, int pos);
 long tcg_GetConnectPosY(tcg_t *tcg, int idx, int dir, int pos);
+int tcg_GetCatchedConnect(tcg_t *tcg, int idx, int *dir_p, int *pos_p);
 
-
+/* tcg_path.c */
+void tcg_ShowAigPoints(tcg_t *tcg, int aig_idx);
+void tcg_CalculateAigPath(tcg_t *tcg, int idx);

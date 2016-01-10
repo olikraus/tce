@@ -153,7 +153,8 @@ void tcg_DrawTig(tcg_t *tcg, int idx, cairo_t *c)
 	cairo_rectangle (c, x0, y0, x1-x0, y1-y0);
 	cairo_stroke (c);
 	
-	
+
+	/*
 	for( dir = 0; dir < 4; dir++ )
 	{
 		cnt = tcg_GetConnectCnt(tcg, idx, dir);
@@ -162,11 +163,20 @@ void tcg_DrawTig(tcg_t *tcg, int idx, cairo_t *c)
 		{
 			x = tgc_GetViewXFromGraph(tcg, tcg_GetConnectPosX(tcg, idx, dir, pos));
 			y = tgc_GetViewYFromGraph(tcg, tcg_GetConnectPosY(tcg, idx, dir, pos));
-			printf("cnt = %d   x=%lf y=%lf\n", cnt, x, y);
+			//printf("cnt = %d   x=%lf y=%lf\n", cnt, x, y);
 			
 			cairo_rectangle (c, x-1, y-1, 3, 3);
 			cairo_stroke (c);
 		}
+	}
+	*/
+	
+	if ( tcg_GetCatchedConnect(tcg, idx, &dir, &pos) )
+	{
+		x = tgc_GetViewXFromGraph(tcg, tcg_GetConnectPosX(tcg, idx, dir, pos));
+		y = tgc_GetViewYFromGraph(tcg, tcg_GetConnectPosY(tcg, idx, dir, pos));
+		cairo_rectangle (c, x-TCG_CONNECT_HALF_WIDTH, y-TCG_CONNECT_HALF_WIDTH, 2*TCG_CONNECT_HALF_WIDTH+1, 2*TCG_CONNECT_HALF_WIDTH+1);
+		cairo_stroke (c);
 	}
 	
 
@@ -453,7 +463,7 @@ int main (int argc, char *argv[])
 		i1 = tcg_AddTig(tcg, "x", 20, 20);
 		i2 = tcg_AddTig(tcg, "x", 70, 50);
 	
-		tcg_AddAig(tcg, i1, 0, i2, 0);
+		tcg_AddAig(tcg, i1, 0, 0, i2, 0, 0);
 	}
 
 
