@@ -102,13 +102,13 @@ void tcg_CalculateAigParallelPath(tcg_t *tcg, int idx)
 {
 	int dir;
 	aig_t *aig;
-	tig_t *eig_src;
-	tig_t *eig_dest;
+	//tig_t *eig_src;
+	//tig_t *eig_dest;
+	
+	//eig_src = tcg_GetTig(tcg, aig->eig_src);
+	//eig_dest = tcg_GetTig(tcg, aig->eig_dest);
+	
 	aig = tcg_GetAig(tcg, idx);
-	
-	eig_src = tcg_GetTig(tcg, aig->eig_src);
-	eig_dest = tcg_GetTig(tcg, aig->eig_dest);
-	
 	/* aig->dir_src == aig->dir_dest */
 	dir = aig->dir_src;
 	aig->dfv_cnt = 1;		/* only one degree of freedom */
@@ -119,6 +119,7 @@ void tcg_CalculateAigParallelPath(tcg_t *tcg, int idx)
 		/* y is fixed, x will be variable */
 		if ( dir == 0 )
 		{
+			printf("tcg_CalculateAigParallelPath: dir == 0\n");
 			/* dir == 0 */
 			aig->dfv_list[0].min = tcg_GetTigBorderValueByDir(tcg,  aig->eig_src,  dir);
 			if ( aig->dfv_list[0].min < tcg_GetTigBorderValueByDir(tcg,  aig->eig_dest,  dir) )
@@ -129,11 +130,11 @@ void tcg_CalculateAigParallelPath(tcg_t *tcg, int idx)
 
 			/* point 0, closer to src */
 			aig->dfv_ref_list[0] = 0;				/* x: use dfv_list[0] */
-			aig->dfv_ref_list[0] = AIG_DFV_MAX;		/* y: fixed with source */
+			aig->dfv_ref_list[1] = AIG_DFV_MAX;		/* y: fixed with source */
 
 			/* point 1, connected to dest */
-			aig->dfv_ref_list[1] = 0;				/* x: use dfv_list[0] */
-			aig->dfv_ref_list[1] = AIG_DFV_MAX+1;	/* y: fixed with dest */
+			aig->dfv_ref_list[2] = 0;				/* x: use dfv_list[0] */
+			aig->dfv_ref_list[3] = AIG_DFV_MAX+1;	/* y: fixed with dest */
 		}
 		else
 		{
@@ -147,11 +148,11 @@ void tcg_CalculateAigParallelPath(tcg_t *tcg, int idx)
 
 			/* point 0, closer to src */
 			aig->dfv_ref_list[0] = 0;				/* x: use dfv_list[0] */
-			aig->dfv_ref_list[0] = AIG_DFV_MAX;		/* y: fixed with source */
+			aig->dfv_ref_list[1] = AIG_DFV_MAX;		/* y: fixed with source */
 
 			/* point 1, connected to dest */
-			aig->dfv_ref_list[1] = 0;				/* x: use dfv_list[0] */
-			aig->dfv_ref_list[1] = AIG_DFV_MAX+1;	/* y: fixed with dest */
+			aig->dfv_ref_list[2] = 0;				/* x: use dfv_list[0] */
+			aig->dfv_ref_list[3] = AIG_DFV_MAX+1;	/* y: fixed with dest */
 			
 		}
 	}
@@ -168,12 +169,12 @@ void tcg_CalculateAigParallelPath(tcg_t *tcg, int idx)
 			aig->dfv_list[0].v = aig->dfv_list[0].min + 5;
 
 			/* point 0, closer to src */
-			aig->dfv_ref_list[0] = AIG_DFV_MAX;		/* y: fixed with source */
-			aig->dfv_ref_list[0] = 0;				/* x: use dfv_list[0] */
+			aig->dfv_ref_list[0] = AIG_DFV_MAX;		/* x: fixed with source */
+			aig->dfv_ref_list[1] = 0;				/* y: use dfv_list[0] */
 
 			/* point 1, connected to dest */
-			aig->dfv_ref_list[1] = AIG_DFV_MAX+1;	/* y: fixed with dest */
-			aig->dfv_ref_list[1] = 0;				/* x: use dfv_list[0] */
+			aig->dfv_ref_list[2] = AIG_DFV_MAX+1;	/* x: fixed with dest */
+			aig->dfv_ref_list[3] = 0;				/* y: use dfv_list[0] */
 			
 		}
 		else
@@ -187,12 +188,12 @@ void tcg_CalculateAigParallelPath(tcg_t *tcg, int idx)
 			aig->dfv_list[0].v = aig->dfv_list[0].max - 5;
 			
 			/* point 0, closer to src */
-			aig->dfv_ref_list[0] = AIG_DFV_MAX;		/* y: fixed with source */
-			aig->dfv_ref_list[0] = 0;				/* x: use dfv_list[0] */
+			aig->dfv_ref_list[0] = AIG_DFV_MAX;		/* x: fixed with source */
+			aig->dfv_ref_list[1] = 0;				/* y: use dfv_list[0] */
 
 			/* point 1, connected to dest */
-			aig->dfv_ref_list[1] = AIG_DFV_MAX+1;	/* y: fixed with dest */
-			aig->dfv_ref_list[1] = 0;				/* x: use dfv_list[0] */
+			aig->dfv_ref_list[2] = AIG_DFV_MAX+1;	/* x: fixed with dest */
+			aig->dfv_ref_list[3] = 0;				/* y: use dfv_list[0] */
 		}
 	}
 }

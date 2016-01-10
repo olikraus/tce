@@ -1,0 +1,158 @@
+/*
+
+	tcg_connect.c
+	
+	Tool Chain Editor, automatic path calculation
+	Copyright (C) 2016 olikraus@gmail.com
+
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+	
+	
+	L: length (width or height) of the box
+	
+	number of connects:
+		T = ((L-2*GRID_SIZE) / GRID_SIZE)/3
+		if ( T == 0 )
+			return 1;
+		return T * 3;
+	
+	
+*/
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <limits.h>
+#include <math.h>
+#include <assert.h>
+#include "tcg.h"
+
+
+int tcg_GetConnectCnt(tcg_t *tcg, int idx, int dir)
+{
+	long l;
+	tig_t *eig;
+	if ( idx < 0 )
+		return 0;	/* error */
+	eig = tcg_GetTig(tcg, idx);
+	if ( eig == NULL )
+		return 0;	/* error */
+	
+	if ( (dir & 1) == 0 )
+	{
+		l = tig_GetHeight(eig);
+	}
+	else
+	{
+		l = tig_GetWidth(eig);
+	}
+	
+	l = (( l -2 * TCG_CONNECT_GRID_SIZE ) / TCG_CONNECT_GRID_SIZE ) / 3;
+	if ( l == 0 )
+		return 1;
+	return l * 3;
+}
+
+long tcg_GetConnectDeltaPos(tcg_t *tcg, int idx, int dir, int pos)
+{
+	long l, m;
+	tig_t *eig;
+	if ( idx < 0 )
+		return 0;	/* error */
+	eig = tcg_GetTig(tcg, idx);
+	if ( eig == NULL )
+		return 0;	/* error */
+	
+	if ( (dir & 1) == 0 )
+	{
+		l = tig_GetHeight(eig);
+	}
+	else
+	{
+		l = tig_GetWidth(eig);
+	}
+	m = l / 2;
+	if ( pos == 0 )
+		return m;
+	
+	if ( (pos & 1) == 1 )
+	{
+		pos /= 2;
+		pos++;
+		return m + pos * TCG_CONNECT_GRID_SIZE;
+	}
+	else
+	{
+		pos /= 2;
+		assert(m - pos * TCG_CONNECT_GRID_SIZE >= 0 );
+		return m - pos * TCG_CONNECT_GRID_SIZE;
+	}
+}
+
+long tcg_GetConnectPosX(tcg_t *tcg, int idx, int dir, int pos)
+{
+	tig_t *eig;
+	if ( idx < 0 )
+		return 0;	/* error */
+	eig = tcg_GetTig(tcg, idx);
+	if ( eig == NULL )
+		return 0;	/* error */
+
+	if ( dir == 0 )
+	{
+		return eig->area.x1;
+	}
+	else if ( dir == 1 )
+	{
+		return eig->area.x0 + tcg_GetConnectDeltaPos(tcg, idx, dir, pos);		
+	}
+	else if ( dir == 2 )
+	{
+		return eig->area.x0;
+	}
+	else 
+	{
+		return eig->area.x0 + tcg_GetConnectDeltaPos(tcg, idx, dir, pos);
+	}
+	
+}
+
+long tcg_GetConnectPosY(tcg_t *tcg, int idx, int dir, int pos)
+{
+	tig_t *eig;
+	if ( idx < 0 )
+		return 0;	/* error */
+	eig = tcg_GetTig(tcg, idx);
+	if ( eig == NULL )
+		return 0;	/* error */
+
+	if ( dir == 0 )
+	{
+		return eig->area.y0 + tcg_GetConnectDeltaPos(tcg, idx, dir, pos);
+	}
+	else if ( dir == 1 )
+	{
+		return eig->area.y1;
+	}
+	else if ( dir == 2 )
+	{
+		return eig->area.y0 + tcg_GetConnectDeltaPos(tcg, idx, dir, pos);
+	}
+	else 
+	{
+		return eig->area.y0;
+	}
+	
+}
+

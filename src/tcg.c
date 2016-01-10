@@ -442,8 +442,8 @@ int tcg_AddTig(tcg_t *tcg, const char *name, long x, long y)
 		{
 			tig->area.x0 = x;
 			tig->area.y0 = y;
-			tig->area.x1 = x + 60;
-			tig->area.y1 = y + 20;
+			tig->area.x1 = x + TCG_CONNECT_GRID_SIZE*12;
+			tig->area.y1 = y + TCG_CONNECT_GRID_SIZE*5;
 			tgc_CalculateDimension(tcg);
 			return idx;
 		}

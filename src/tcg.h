@@ -131,7 +131,17 @@ struct tcg_struct
 
 
 /*========================================*/
+/* "element in graph" procedures */
+
+long tig_GetWidth(tig_t *tig);
+long tig_GetHeight(tig_t *tig);
+
+
+/*========================================*/
 /* tcg procedures */
+
+#define TCG_CONNECT_GRID_SIZE 6
+
 
 #define tcg_GetTIgCnt(tcg) ps_Cnt((tcg)->tig_list)
 #define tcg_WhileTig(tcg, idx) ps_WhileLoop((tcg)->tig_list, (idx))
@@ -162,5 +172,12 @@ int tcg_IsCatched(tcg_t *tcg, int idx);
 int tcg_IsSelected(tcg_t *tcg, int idx);
 int tcg_SendEventWithGraphPosition(tcg_t *tcg, int event, long x, long y);
 int tcg_SendEventWithViewPosition(tcg_t *tcg, int event, double x, double y);
+
+
+/* tcg_connect.c */
+int tcg_GetConnectCnt(tcg_t *tcg, int idx, int dir);
+long tcg_GetConnectDeltaPos(tcg_t *tcg, int idx, int dir, int pos);
+long tcg_GetConnectPosX(tcg_t *tcg, int idx, int dir, int pos);
+long tcg_GetConnectPosY(tcg_t *tcg, int idx, int dir, int pos);
 
 

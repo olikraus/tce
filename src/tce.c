@@ -111,6 +111,9 @@ void tcg_DrawTig(tcg_t *tcg, int idx, cairo_t *c)
 {
 	tig_t *tig;
 	double x0, x1, y0, y1;
+	double x, y;
+	int dir, pos, cnt;
+	
 	cairo_text_extents_t extents;
 
 	
@@ -124,6 +127,10 @@ void tcg_DrawTig(tcg_t *tcg, int idx, cairo_t *c)
 	y1 =  tgc_GetViewYFromGraph(tcg, tig->area.y1);
 
 	// printf("tcg_DrawTig: dx=%ld dy=%ld    x0=%ld x1=%ld y0=%ld y1=%ld    x0=%lf x1=%lf y0=%lf y1=%lf\n", tcg->tcgv->x, tcg->tcgv->y, tig->area.x0, tig->area.x1, tig->area.y0, tig->area.y1, x0, x1, y0, y1);
+
+	cairo_set_source_rgb (c, 0.7, 0.7, 0.7);
+	cairo_rectangle (c, x0+1.0, y0+1.0, x1-x0-2.0, y1-y0-2.0);
+	cairo_fill(c);
 	
 	if ( tcg_IsSelected(tcg, idx) )
 	{
@@ -133,6 +140,7 @@ void tcg_DrawTig(tcg_t *tcg, int idx, cairo_t *c)
 	{
 		cairo_set_source_rgb (c, 0, 0, 0);
 	}
+	
 	
 	if ( tcg_IsCatched(tcg, idx) )
 	{
@@ -144,9 +152,25 @@ void tcg_DrawTig(tcg_t *tcg, int idx, cairo_t *c)
 	}
 	cairo_rectangle (c, x0, y0, x1-x0, y1-y0);
 	cairo_stroke (c);
-	cairo_set_source_rgb (c, 0.7, 0.7, 0.7);
-	cairo_rectangle (c, x0+1.0, y0+1.0, x1-x0-2.0, y1-y0-2.0);
-	cairo_fill(c);
+	
+	
+	for( dir = 0; dir < 4; dir++ )
+	{
+		cnt = tcg_GetConnectCnt(tcg, idx, dir);
+		printf("cnt = %d\n", cnt);
+		for ( pos = 0; pos < cnt; pos++ )
+		{
+			x = tgc_GetViewXFromGraph(tcg, tcg_GetConnectPosX(tcg, idx, dir, pos));
+			y = tgc_GetViewYFromGraph(tcg, tcg_GetConnectPosY(tcg, idx, dir, pos));
+			printf("cnt = %d   x=%lf y=%lf\n", cnt, x, y);
+			
+			cairo_rectangle (c, x-1, y-1, 3, 3);
+			cairo_stroke (c);
+		}
+	}
+	
+
+	
 	
 	cairo_new_path(c);
 	cairo_select_font_face (c, "sans-serif",  CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
