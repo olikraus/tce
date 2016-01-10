@@ -44,6 +44,7 @@ long tcg_GetTigBorderValueByDir(tcg_t *tcg, int idx, int dir)
 	}
 	return 0;
 }
+
 int tcg_GetAigPointCnt(tcg_t *tcg, int aig_idx)
 {
 	aig_t *aig;

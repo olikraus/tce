@@ -205,6 +205,25 @@ void tcg_RedrawAll(tcg_t *tcg, cairo_t *c)
 		tcg_DrawTig(tcg, i, c);
 	}
 	
+	/* intermediate line drawing, will be removed */
+	i = -1;
+	while( tcg_WhileAig(tcg, &i)  )
+	{
+		int j, cnt;
+		cnt = tcg_GetAigPointCnt(tcg, i);
+		
+		cairo_set_source_rgba (c, 0.0, 0.0, 1.0, 1.0);
+		cairo_set_line_width (c, 1);
+		cairo_new_path(c);
+		cairo_move_to(c, tgc_GetViewXFromGraph(tcg, tcg_GetAigPointX(tcg, i, 0)), tgc_GetViewYFromGraph(tcg, tcg_GetAigPointY(tcg, i, 0)));
+		
+		for( j = 1; j < cnt; j++ )
+		{
+			cairo_line_to(c, tgc_GetViewXFromGraph(tcg, tcg_GetAigPointX(tcg, i, j)), tgc_GetViewYFromGraph(tcg, tcg_GetAigPointY(tcg, i, j)));
+		}
+		cairo_stroke (c);	
+	}
+	
 	if ( tcg_IsCatchAreaVisible(tcg) )
 	{
 		double x0, x1, y0, y1; 
@@ -464,6 +483,9 @@ int main (int argc, char *argv[])
 		i2 = tcg_AddTig(tcg, "x", 70, 50);
 	
 		tcg_AddAig(tcg, i1, 0, 0, i2, 0, 0);
+		//tcg_AddAig(tcg, i1, 1, 0, i2, 1, 0);
+		//tcg_AddAig(tcg, i1, 2, 0, i2, 2, 0);
+		//tcg_AddAig(tcg, i1, 3, 0, i2, 3, 0);
 	}
 
 

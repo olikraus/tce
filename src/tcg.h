@@ -55,9 +55,8 @@ struct tig_struct
 {
 	char *name;
 	rect_t area;		/* the current rectangle (position and size) which covers this element */
-	rect_t move_start_area;	/* backup of the current position and size when move has started */
-	
-	unsigned int is_selected; /* tig is selected */
+	rect_t move_start_area;	/* backup of the current position and size when move has started */	
+	unsigned int is_selected; /* eig is selected */
 };
 
 /* degree of freedom variable */
@@ -187,5 +186,9 @@ long tcg_GetConnectPosY(tcg_t *tcg, int idx, int dir, int pos);
 int tcg_GetCatchedConnect(tcg_t *tcg, int idx, int *dir_p, int *pos_p);
 
 /* tcg_path.c */
+int tcg_GetAigPointCnt(tcg_t *tcg, int aig_idx);
+long tcg_GetAigPointX(tcg_t *tcg, int aig_idx, int pnt_idx);
+long tcg_GetAigPointY(tcg_t *tcg, int aig_idx, int pnt_idx);
+
 void tcg_ShowAigPoints(tcg_t *tcg, int aig_idx);
 void tcg_CalculateAigPath(tcg_t *tcg, int idx);
