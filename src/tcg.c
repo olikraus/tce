@@ -28,7 +28,7 @@
 
 /*========================================*/
 
-int strset(char **s, const char *t)
+int tce_strset(char **s, const char *t)
 {
 	if ( s == NULL )
 		return 0;
@@ -132,7 +132,7 @@ tig_t *tig_Open(const char *name)
 	{
 		tig->name = NULL;
 		
-		if ( strset(&(tig->name), "<none>") != 0 )
+		if ( tce_strset(&(tig->name), "<none>") != 0 )
 		{
 			clear_rectangle(&(tig->area));
 			clear_rectangle(&(tig->move_start_area));
@@ -147,13 +147,13 @@ tig_t *tig_Open(const char *name)
 
 void tig_Close(tig_t *tig)
 {
-	strset(&(tig->name), NULL);
+	tce_strset(&(tig->name), NULL);
 	free(tig);
 }
 
 int tig_SetName(tig_t *tig, const char *s)
 {
-	return strset(&(tig->name), s);
+	return tce_strset(&(tig->name), s);
 }
 
 long tig_GetWidth(tig_t *tig)

@@ -1,3 +1,4 @@
+CC=gcc
 CFLAGS=-g -Wall `pkg-config --cflags --libs gtk+-3.0 gmodule-2.0`
 LDFLAGS=-g -Wall `pkg-config --cflags --libs gtk+-3.0 gmodule-2.0` -lm
 
