@@ -61,16 +61,16 @@ long tcg_GetAigPointX(tcg_t *tcg, int aig_idx, int pnt_idx)
 	
 	if ( pnt_idx == 0 )
 	{
-		x = tcg_GetConnectPosX(tcg, aig->eig_src, aig->dir_src, aig->pos_src);
+		x = tcg_GetConnectPosX(tcg, aig->tig_src, aig->dir_src, aig->pos_src);
 	}
 	else if ( pnt_idx == aig->dfv_cnt+2 )
 	{
-		x = tcg_GetConnectPosX(tcg, aig->eig_dest, aig->dir_dest, aig->pos_dest);
+		x = tcg_GetConnectPosX(tcg, aig->tig_dest, aig->dir_dest, aig->pos_dest);
 	}
 	else if ( pnt_idx == aig->dfv_cnt+1 )
 	{
 		if ( (aig->dir_dest & 1) != 0 )
-			x = tcg_GetConnectPosX(tcg, aig->eig_dest, aig->dir_dest, aig->pos_dest);
+			x = tcg_GetConnectPosX(tcg, aig->tig_dest, aig->dir_dest, aig->pos_dest);
 		else
 			x = tcg_GetAigPointX(tcg, aig_idx, pnt_idx - 1);			
 	}
@@ -93,16 +93,16 @@ long tcg_GetAigPointY(tcg_t *tcg, int aig_idx, int pnt_idx)
 	
 	if ( pnt_idx == 0 )
 	{
-		y = tcg_GetConnectPosY(tcg, aig->eig_src, aig->dir_src, aig->pos_src);
+		y = tcg_GetConnectPosY(tcg, aig->tig_src, aig->dir_src, aig->pos_src);
 	}
 	else if ( pnt_idx == aig->dfv_cnt+2 )
 	{
-		y = tcg_GetConnectPosY(tcg, aig->eig_dest, aig->dir_dest, aig->pos_dest);
+		y = tcg_GetConnectPosY(tcg, aig->tig_dest, aig->dir_dest, aig->pos_dest);
 	}
 	else if ( pnt_idx == aig->dfv_cnt+1 )
 	{
 		if ( (aig->dir_dest & 1) == 0 )
-			y = tcg_GetConnectPosY(tcg, aig->eig_dest, aig->dir_dest, aig->pos_dest);
+			y = tcg_GetConnectPosY(tcg, aig->tig_dest, aig->dir_dest, aig->pos_dest);
 		else
 			y = tcg_GetAigPointY(tcg, aig_idx, pnt_idx - 1);
 	}
@@ -160,8 +160,8 @@ void tcg_CalculateAigParallelPath(tcg_t *tcg, int idx)
 	//tig_t *eig_src;
 	//tig_t *eig_dest;
 	
-	//eig_src = tcg_GetTig(tcg, aig->eig_src);
-	//eig_dest = tcg_GetTig(tcg, aig->eig_dest);
+	//eig_src = tcg_GetTig(tcg, aig->tig_src);
+	//eig_dest = tcg_GetTig(tcg, aig->tig_dest);
 	
 	aig = tcg_GetAig(tcg, idx);
 	/* aig->dir_src == aig->dir_dest */
@@ -176,9 +176,9 @@ void tcg_CalculateAigParallelPath(tcg_t *tcg, int idx)
 		{
 			printf("tcg_CalculateAigParallelPath: dir == 0\n");
 			/* dir == 0 */
-			aig->dfv_list[0].min = tcg_GetTigBorderValueByDir(tcg,  aig->eig_src,  dir);
-			if ( aig->dfv_list[0].min < tcg_GetTigBorderValueByDir(tcg,  aig->eig_dest,  dir) )
-				aig->dfv_list[0].min = tcg_GetTigBorderValueByDir(tcg,  aig->eig_dest,  dir);
+			aig->dfv_list[0].min = tcg_GetTigBorderValueByDir(tcg,  aig->tig_src,  dir);
+			if ( aig->dfv_list[0].min < tcg_GetTigBorderValueByDir(tcg,  aig->tig_dest,  dir) )
+				aig->dfv_list[0].min = tcg_GetTigBorderValueByDir(tcg,  aig->tig_dest,  dir);
 			
 			aig->dfv_list[0].max = LONG_MAX;
 			aig->dfv_list[0].v = aig->dfv_list[0].min + 5;
@@ -196,9 +196,9 @@ void tcg_CalculateAigParallelPath(tcg_t *tcg, int idx)
 		else
 		{
 			/* dir == 2 */
-			aig->dfv_list[0].max = tcg_GetTigBorderValueByDir(tcg,  aig->eig_src,  dir);
-			if ( aig->dfv_list[0].max > tcg_GetTigBorderValueByDir(tcg,  aig->eig_dest,  dir) )
-				aig->dfv_list[0].max = tcg_GetTigBorderValueByDir(tcg,  aig->eig_dest,  dir);
+			aig->dfv_list[0].max = tcg_GetTigBorderValueByDir(tcg,  aig->tig_src,  dir);
+			if ( aig->dfv_list[0].max > tcg_GetTigBorderValueByDir(tcg,  aig->tig_dest,  dir) )
+				aig->dfv_list[0].max = tcg_GetTigBorderValueByDir(tcg,  aig->tig_dest,  dir);
 
 			aig->dfv_list[0].max = LONG_MIN;
 			aig->dfv_list[0].v = aig->dfv_list[0].max - 5;
@@ -219,9 +219,9 @@ void tcg_CalculateAigParallelPath(tcg_t *tcg, int idx)
 		if ( dir == 1 )
 		{
 			/* dir == 1 */
-			aig->dfv_list[0].min = tcg_GetTigBorderValueByDir(tcg,  aig->eig_src,  dir);
-			if ( aig->dfv_list[0].min < tcg_GetTigBorderValueByDir(tcg,  aig->eig_dest,  dir) )
-				aig->dfv_list[0].min = tcg_GetTigBorderValueByDir(tcg,  aig->eig_dest,  dir);
+			aig->dfv_list[0].min = tcg_GetTigBorderValueByDir(tcg,  aig->tig_src,  dir);
+			if ( aig->dfv_list[0].min < tcg_GetTigBorderValueByDir(tcg,  aig->tig_dest,  dir) )
+				aig->dfv_list[0].min = tcg_GetTigBorderValueByDir(tcg,  aig->tig_dest,  dir);
 			
 			aig->dfv_list[0].max = LONG_MAX;
 			aig->dfv_list[0].v = aig->dfv_list[0].min + 5;
@@ -239,9 +239,9 @@ void tcg_CalculateAigParallelPath(tcg_t *tcg, int idx)
 		else
 		{
 			/* dir == 3 */
-			aig->dfv_list[0].max = tcg_GetTigBorderValueByDir(tcg,  aig->eig_src,  dir);
-			if ( aig->dfv_list[0].max > tcg_GetTigBorderValueByDir(tcg,  aig->eig_dest,  dir) )
-				aig->dfv_list[0].max = tcg_GetTigBorderValueByDir(tcg,  aig->eig_dest,  dir);
+			aig->dfv_list[0].max = tcg_GetTigBorderValueByDir(tcg,  aig->tig_src,  dir);
+			if ( aig->dfv_list[0].max > tcg_GetTigBorderValueByDir(tcg,  aig->tig_dest,  dir) )
+				aig->dfv_list[0].max = tcg_GetTigBorderValueByDir(tcg,  aig->tig_dest,  dir);
 
 			aig->dfv_list[0].max = LONG_MIN;
 			aig->dfv_list[0].v = aig->dfv_list[0].max - 5;

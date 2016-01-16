@@ -27,8 +27,9 @@
 /* forward typedefs */
 
 typedef struct tcgv_struct tcgv_t;
-typedef struct tig_struct tig_t;
-typedef struct aig_struct aig_t;
+typedef struct tig_struct tig_t;		/* tool in graph */
+typedef struct aig_struct aig_t;		/* artefact in graph */
+typedef struct seg_struct seg_t;		/* segment in graph */
 typedef struct tcg_struct tcg_t;
 typedef struct rect_struct rect_t;
 
@@ -56,7 +57,7 @@ struct tig_struct
 	char *name;
 	rect_t area;		/* the current rectangle (position and size) which covers this element */
 	rect_t move_start_area;	/* backup of the current position and size when move has started */	
-	unsigned int is_selected; /* eig is selected */
+	unsigned int is_selected; /* tig is selected */
 };
 
 /* degree of freedom variable */
@@ -77,11 +78,11 @@ typedef struct dfv_struct dfv_t;
 #define AIG_DFV_MAX 3
 struct aig_struct
 {
-	int eig_src;	/* element index (tig_list) source tool*/
+	int tig_src;	/* element index (tig_list) source tool*/
 	int dir_src;	/* 0 right edge, 1 bottom edge, 2 left edge, 3 top edge */
 	int pos_src;	/* position number of the connector */
 	
-	int eig_dest; 	/* element index (tig_list) destination tool */
+	int tig_dest; 	/* element index (tig_list) destination tool */
 	int dir_dest;	/* 0 right edge, 1 bottom edge, 2 left edge, 3 top edge */
 	int pos_dest;	/* position number of the connector */
 	
@@ -93,16 +94,23 @@ struct aig_struct
 	//int dfv_ref_list[AIG_POINT_MAX*2]; /* -1 if the value in point_val_list is valid. otherwise index into dfv_list */
 
 	//int point_val_cnt;	/* number of points, between 0 and AIG_POINT_MAX-1 */
-	//long point_val_list[AIG_POINT_MAX*2]; /* even: x, odd: y... not required???? */
-	
+	//long point_val_list[AIG_POINT_MAX*2]; /* even: x, odd: y... not required???? */	
+};
+
+/* artefact path segment in graph (sig) */
+struct seg_struct
+{
+  int aig_idx;		/* to which aig this segment belongs */
+  int seg_seq_no;	/* from 0 to dfv_cnt + 2 */
 };
 
 /* the tool chain graph */
 struct tcg_struct
 {
 	ps_t *tig_list;
-	
 	ps_t *aig_list;
+	ps_t *seg_list;
+  
 	/* dimensions of the graph */
 	rect_t graph_dimension;
 
@@ -136,6 +144,11 @@ struct tcg_struct
 
 
 /*========================================*/
+/* util */
+
+int is_rectangle_intersection(const rect_t *a, const rect_t *b);
+
+/*========================================*/
 /* "element in graph" procedures */
 
 long tig_GetWidth(tig_t *tig);
@@ -159,6 +172,11 @@ long tig_GetHeight(tig_t *tig);
 #define tcg_GetAig(tcg, idx) ((aig_t *)ps_Get((tcg)->aig_list, (idx)))
 #define tcg_SetAig(tcg, idx, aig) (ps_Set((tcg)->aig_list, (idx), (void *)(aig)))
 
+#define tcg_GetSegCnt(tcg) ps_Cnt((tcg)->seg_list)
+#define tcg_WhileSeg(tcg, idx) ps_WhileLoop((tcg)->seg_list, (idx))
+#define tcg_GetSeg(tcg, idx) ((seg_t *)ps_Get((tcg)->seg_list, (idx)))
+#define tcg_SetSeg(tcg, idx, seg) (ps_Set((tcg)->seg_list, (idx), (void *)(seg)))
+
 void tgc_CalculateDimension(tcg_t *tcg);
 long tgc_GetGraphXFromView(tcg_t *tcg, double x);
 long tgc_GetGraphYFromView(tcg_t *tcg, double y);
@@ -173,7 +191,7 @@ int tcg_AddAig(tcg_t *tcg, int eig_src, int dir_src, int pos_src, int eig_dest, 
 
 int tcg_CatchElement(tcg_t *tcg, double x, double y);
 int tcg_IsCatched(tcg_t *tcg, int idx);
-int tcg_IsSelected(tcg_t *tcg, int idx);
+int tcg_IsTigSelected(tcg_t *tcg, int idx);
 int tcg_SendEventWithGraphPosition(tcg_t *tcg, int event, long x, long y);
 int tcg_SendEventWithViewPosition(tcg_t *tcg, int event, double x, double y);
 

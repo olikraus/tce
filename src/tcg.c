@@ -237,9 +237,9 @@ aig_t *aig_Open(void)
 	aig = (aig_t *)malloc(sizeof(aig_t));
 	if ( aig != NULL )
 	{
-		aig->eig_src = -1;
+		aig->tig_src = -1;
 		aig->dir_src = 0;
-		aig->eig_dest = -1;
+		aig->tig_dest = -1;
 		aig->dir_dest = 0;
 
 		aig->dfv_cnt = 0;
@@ -268,6 +268,25 @@ void aig_Close(aig_t *aig)
 {
 	free(aig);
 }
+
+seg_t *seg_Open(void)
+{
+  seg_t *s;
+  s = (seg_t *)malloc(sizeof(seg_t));
+  if ( s != NULL )
+  {
+    s->aig_idx = -1;
+    s->seg_seq_no = -1;
+    return s;
+  }
+  return NULL;
+}
+
+void seg_Close(seg_t *seg)
+{
+  free(seg);
+}
+
 
 /*========================================*/
 
@@ -331,10 +350,15 @@ tcg_t *tcg_Open(void)
 				tcg->aig_list = ps_Open();
 				if ( tcg->aig_list != NULL )
 				{
-					tgc_CalculateDimension(tcg);
-					invalid_rectangle(&(tcg->catch_area));
-					tcg->state = TCG_STATE_IDLE;
-					return tcg;
+					tcg->seg_list = ps_Open();
+					if ( tcg->seg_list != NULL )
+					{
+						tgc_CalculateDimension(tcg);
+						invalid_rectangle(&(tcg->catch_area));
+						tcg->state = TCG_STATE_IDLE;
+						return tcg;
+					}
+					ps_Close(tcg->aig_list);
 				}
 				ps_Close(tcg->tig_list);
 			}
@@ -375,12 +399,29 @@ static void tcg_ClearAigList(tcg_t *tcg)
 	ps_Clear(tcg->tig_list);
 }
 
+static void tcg_ClearSegList(tcg_t *tcg)
+{
+	int i;
+	seg_t *seg;
+	
+	i = -1;
+	while( tcg_WhileSeg(tcg, &i) )
+	{
+		seg = tcg_GetSeg(tcg, i);
+		seg_Close(seg);
+		tcg_SetSeg(tcg, i, NULL);
+	}
+	ps_Clear(tcg->seg_list);
+}
+
 void tcg_Close(tcg_t *tcg)
 {
 	tcg_ClearTigList(tcg);
 	tcg_ClearAigList(tcg);
+	tcg_ClearSegList(tcg);
 	ps_Close(tcg->aig_list);
 	ps_Close(tcg->tig_list);
+	ps_Close(tcg->seg_list);
 	tcgv_Close(tcg->tcgv);
 	free(tcg);
 }
@@ -456,7 +497,9 @@ int tcg_AddTig(tcg_t *tcg, const char *name, long x, long y)
 }
 
 
-int tcg_AddAig(tcg_t *tcg, int eig_src, int dir_src, int pos_src, int eig_dest, int dir_dest, int pos_dest)
+//int tcg_
+
+int tcg_AddAig(tcg_t *tcg, int tig_src, int dir_src, int pos_src, int tig_dest, int dir_dest, int pos_dest)
 {
 	int idx;
 	aig_t *aig;
@@ -465,11 +508,11 @@ int tcg_AddAig(tcg_t *tcg, int eig_src, int dir_src, int pos_src, int eig_dest, 
 	{
 		aig = tcg_GetAig(tcg, idx);
 		
-		aig->eig_src = eig_src;
+		aig->tig_src = tig_src;
 		aig->dir_src = dir_src;
 		aig->pos_src = pos_src;
 		
-		aig->eig_dest = eig_dest;
+		aig->tig_dest = tig_dest;
 		aig->dir_dest = dir_dest;
 		aig->pos_dest = pos_dest;
 		
@@ -482,7 +525,7 @@ int tcg_AddAig(tcg_t *tcg, int eig_src, int dir_src, int pos_src, int eig_dest, 
 }
 
 
-int tcg_IsSelected(tcg_t *tcg, int idx)
+int tcg_IsTigSelected(tcg_t *tcg, int idx)
 {
 	tig_t *tig;
 	if ( idx < 0 )
@@ -491,7 +534,7 @@ int tcg_IsSelected(tcg_t *tcg, int idx)
 	return tig->is_selected;
 }
 
-void tcg_Select(tcg_t *tcg, int idx)
+void tcg_SelectTig(tcg_t *tcg, int idx)
 {
 	tig_t *tig;
 	if ( idx < 0 )
@@ -500,7 +543,7 @@ void tcg_Select(tcg_t *tcg, int idx)
 	tig_Select(tig);
 }
 
-void tcg_Deselect(tcg_t *tcg, int idx)
+void tcg_DeselectTig(tcg_t *tcg, int idx)
 {
 	tig_t *tig;
 	if ( idx < 0 )
@@ -516,7 +559,7 @@ void tcg_DeselectAll(tcg_t *tcg)
 	i = -1;
 	while( tcg_WhileTig(tcg, &i) )
 	{
-		tcg_Deselect(tcg, i);
+		tcg_DeselectTig(tcg, i);
 	}
 }
 
@@ -666,14 +709,14 @@ static int tcg_handle_state_idle(tcg_t *tcg, int event , long x, long y)
 				/* store the reference position */
 				tcg->start_x = x;				
 				tcg->start_y = y;
-				if ( tcg_IsSelected(tcg, idx) != 0 )
+				if ( tcg_IsTigSelected(tcg, idx) != 0 )
 				{
 					tcg->state = TCG_STATE_SELECTON_MOVE;
 				}
 				else
 				{
 					tcg_DeselectAll(tcg);
-					tcg_Select(tcg, idx);
+					tcg_SelectTig(tcg, idx);
 					tcg->state = TCG_STATE_SINGLE_MOVE;
 				}				
 				r = 1;	/* catch area change */
@@ -696,13 +739,13 @@ static int tcg_handle_state_idle(tcg_t *tcg, int event , long x, long y)
 				/* shift mouse button press: single element (de)selection */
 				/* state does not change here, change is applied directly */
 				tcg_SetCatchAreaToPoint(tcg, x, y);
-				if ( tcg_IsSelected(tcg, idx) != 0 )
+				if ( tcg_IsTigSelected(tcg, idx) != 0 )
 				{
-					tcg_Deselect(tcg, idx);
+					tcg_DeselectTig(tcg, idx);
 				}
 				else
 				{
-					tcg_Select(tcg, idx);					
+					tcg_SelectTig(tcg, idx);					
 				}
 				r = 1;	/* catch area change and selection change of elemnt(idx) */
 			}

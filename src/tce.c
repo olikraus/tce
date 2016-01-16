@@ -132,7 +132,7 @@ void tcg_DrawTig(tcg_t *tcg, int idx, cairo_t *c)
 	cairo_rectangle (c, x0+1.0, y0+1.0, x1-x0-2.0, y1-y0-2.0);
 	cairo_fill(c);
 	
-	if ( tcg_IsSelected(tcg, idx) )
+	if ( tcg_IsTigSelected(tcg, idx) )
 	{
 		cairo_set_source_rgb (c, 1.0, 0.0, 0.0);
 	}
