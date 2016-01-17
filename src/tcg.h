@@ -156,6 +156,11 @@ long tig_GetHeight(tig_t *tig);
 
 
 /*========================================*/
+seg_t *seg_Open(void);
+void seg_Close(seg_t *seg);
+
+
+/*========================================*/
 /* tcg procedures */
 
 #define TCG_CONNECT_GRID_SIZE 6

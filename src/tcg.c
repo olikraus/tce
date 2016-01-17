@@ -269,6 +269,8 @@ void aig_Close(aig_t *aig)
 	free(aig);
 }
 
+/*========================================*/
+
 seg_t *seg_Open(void)
 {
   seg_t *s;

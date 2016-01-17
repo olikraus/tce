@@ -286,3 +286,42 @@ void tcg_CalculateAigPath(tcg_t *tcg, int idx)
 	}
 }
 
+/* returns position or -1 */
+int tcg_AddPlainSeg(tcg_t *tcg)
+{
+	seg_t *seg;
+	int idx;
+	seg = seg_Open();
+	if ( seg != NULL )
+	{
+		idx = ps_Add(tcg->seg_list, seg);
+		if ( idx >= 0 )
+		{
+			return idx;
+		}
+		seg_Close(seg);
+	}
+	return -1;
+}
+
+/*
+  delete all segments which belong to the speciofied artefact index
+*/
+void tcg_DeleteSegPathByAig(tcg_t *tcg, int aig_idx)
+{
+	int i;
+	seg_t *seg;
+	
+	i = -1;
+	while( tcg_WhileSeg(tcg, &i) )
+	{
+		seg = tcg_GetSeg(tcg, i);
+		if ( seg->aig_idx == aig_idx )
+		{
+		  seg_Close(seg);
+		  ps_Del(tcg->seg_list, i);
+		}
+	}
+  
+}
+
