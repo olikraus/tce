@@ -215,6 +215,18 @@ void tcg_GetAigSegRect(tcg_t *tcg, int aig_idx, int seg_idx, rect_t *r)
 }
 
 
+/* check if the element with "idx" is catched */
+int tcg_IsAigSegCatched(tcg_t *tcg, int aig_idx, int seg_idx)
+{
+	rect_t r;
+	
+	if ( aig_idx < 0 )
+		return 0;
+	
+	tcg_GetAigSegRect(tcg, aig_idx, seg_idx, &r);
+	return is_rectangle_intersection(&r, &(tcg->catch_area));
+}
+
 
 
 

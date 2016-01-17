@@ -205,19 +205,6 @@ void tcg_DeselectAll(tcg_t *tcg)
 }
 
 
-/* check if the element with "idx" is catched */
-int tcg_IsCatched(tcg_t *tcg, int idx)
-{
-	tig_t *tig;
-	if ( idx < 0 )
-		return 0;
-	tig = tcg_GetTig(tcg, idx);
-	if ( tig == NULL )
-		return 0;
-	return is_rectangle_intersection(&(tig->area), &(tcg->catch_area));
-
-}
-
 
 void tcg_AddCatchedToSelection(tcg_t *tcg)
 {
@@ -226,7 +213,7 @@ void tcg_AddCatchedToSelection(tcg_t *tcg)
 	i = -1;
 	while( tcg_WhileTig(tcg, &i) )
 	{
-		if ( tcg_IsCatched(tcg, i) != 0 )
+		if ( tcg_IsTigCatched(tcg, i) != 0 )
 		{
 			tig = tcg_GetTig(tcg, i);
 			tig_Select(tig);

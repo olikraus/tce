@@ -71,7 +71,7 @@ long tig_GetHeight(tig_t *tig)
 	return tig->area.y1 - tig->area.y0 + 1;
 }
 
-/* replaced by tcg_IsCatched() */
+/* replaced by tcg_IsTigCatched() */
 /*
 int tig_IsInside(tig_t *tig, long x, long y)
 {
@@ -213,5 +213,17 @@ void tcg_DeselectTig(tcg_t *tcg, int idx)
 		return;
 	tig = tcg_GetTig(tcg, idx);
 	tig_Deselect(tig);
+}
+
+/* check if the element with "idx" is catched */
+int tcg_IsTigCatched(tcg_t *tcg, int idx)
+{
+	tig_t *tig;
+	if ( idx < 0 )
+		return 0;
+	tig = tcg_GetTig(tcg, idx);
+	if ( tig == NULL )
+		return 0;
+	return is_rectangle_intersection(&(tig->area), &(tcg->catch_area));
 }
 

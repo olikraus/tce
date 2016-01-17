@@ -158,7 +158,7 @@ long tcg_GetConnectPosY(tcg_t *tcg, int idx, int dir, int pos)
 
 /*
 	checks, whether the connector at "dir" and "pos" is catched
-	tcg_IsCatched(tcg, idx) should also return 1 (however, this is not checked here)
+	tcg_IsTigCatched(tcg, idx) should also return 1 (however, this is not checked here)
 
 	additionally, this check should not be executed if tcg_IsCatchAreaVisible(tcg) returns true
 */
@@ -193,7 +193,7 @@ int tcg_GetCatchedConnect(tcg_t *tcg, int idx, int *dir_p, int *pos_p)
 	if ( tcg_IsCatchAreaVisible(tcg)  != 0 )
 		return 0;		/* do not catch a connector in multi catch mode */
 	
-	if ( tcg_IsCatched(tcg, idx) == 0 )
+	if ( tcg_IsTigCatched(tcg, idx) == 0 )
 		return 0;		/* master element is not chatched */
 	
 	for( dir = 0; dir < 4; dir++ )

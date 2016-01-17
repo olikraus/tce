@@ -192,6 +192,7 @@ int tcg_IsTigSelected(tcg_t *tcg, int idx);
 void tcg_SelectTig(tcg_t *tcg, int idx);
 void tcg_DeselectTig(tcg_t *tcg, int idx);
 
+int tcg_IsTigCatched(tcg_t *tcg, int idx);
 
 /*========================================*/
 /* tcg_aig.c (Artefact In Graph) */
@@ -238,7 +239,7 @@ long tcg_GetAigSegStartPointY(tcg_t *tcg, int aig_idx, int seg_idx);
 long tcg_GetAigSegEndPointY(tcg_t *tcg, int aig_idx, int seg_idx);
 int tcg_IsAigSegVertical(tcg_t *tcg, int aig_idx, int seg_idx);
 void tcg_GetAigSegRect(tcg_t *tcg, int aig_idx, int seg_idx, rect_t *r);
-
+int tcg_IsAigSegCatched(tcg_t *tcg, int aig_idx, int seg_idx);
 
 
 void tcg_ShowAigPoints(tcg_t *tcg, int aig_idx);
@@ -261,7 +262,6 @@ void tcg_Close(tcg_t *tcg);
 
 
 int tcg_CatchElement(tcg_t *tcg, double x, double y);
-int tcg_IsCatched(tcg_t *tcg, int idx);
 int tcg_IsTigSelected(tcg_t *tcg, int idx);
 int tcg_SendEventWithGraphPosition(tcg_t *tcg, int event, long x, long y);
 int tcg_SendEventWithViewPosition(tcg_t *tcg, int event, double x, double y);

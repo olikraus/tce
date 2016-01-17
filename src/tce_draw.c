@@ -118,8 +118,8 @@ static void tcg_DrawRect(tcg_t *tcg, rect_t *r, int style, int is_selected, int 
 			cairo_set_line_width (c, 1* tcg->tcgv->zoom);			
 		}
 		cairo_rectangle (c, x0, y0, x1-x0, y1-y0);
-		cairo_fill(c);
-		//cairo_stroke (c);				
+		//cairo_fill(c);
+		cairo_stroke (c);				
 	}
 	
 	
@@ -141,7 +141,7 @@ void tcg_DrawTig(tcg_t *tcg, int idx, cairo_t *c)
 		&(tig->area), 
 		TCG_RECT_STYLE_TIG, 
 		tcg_IsTigSelected(tcg, idx),  
-		tcg_IsCatched(tcg, idx), 
+		tcg_IsTigCatched(tcg, idx), 
 		c);
 	
 	if ( tcg_GetCatchedConnectRect(tcg, idx, &r) != 0 )
@@ -150,7 +150,7 @@ void tcg_DrawTig(tcg_t *tcg, int idx, cairo_t *c)
 			&r, 
 			TCG_RECT_STYLE_TIG_CONNECTOR, 
 			tcg_IsTigSelected(tcg, idx),  
-			tcg_IsCatched(tcg, idx), 
+			tcg_IsTigCatched(tcg, idx), 
 			c);
 	}
 	
@@ -187,7 +187,7 @@ void tcg_DrawAig(tcg_t *tcg, int aig_idx, cairo_t *c)
 			&r, 
 			TCG_RECT_STYLE_SEG, 
 			/* selected */ 1,  
-			/* catched */ 1, 
+			/* catched */ tcg_IsAigSegCatched(tcg, aig_idx, j), 
 			c);
 	}
 	
