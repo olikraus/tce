@@ -143,30 +143,6 @@ struct tcg_struct
 #define tcg_IsCatchAreaVisible(tcg) ((tcg)->state == TCG_STATE_DO_CATCH_AREA_SELECTION)
 
 
-/*========================================*/
-/* util */
-
-int is_rectangle_intersection(const rect_t *a, const rect_t *b);
-
-/*========================================*/
-/* "element in graph" procedures */
-
-long tig_GetWidth(tig_t *tig);
-long tig_GetHeight(tig_t *tig);
-
-
-/*========================================*/
-seg_t *seg_Open(void);
-void seg_Close(seg_t *seg);
-
-
-/*========================================*/
-/* tcg procedures */
-
-#define TCG_CONNECT_GRID_SIZE 6
-#define TCG_CONNECT_HALF_WIDTH 2
-
-
 #define tcg_GetTIgCnt(tcg) ps_Cnt((tcg)->tig_list)
 #define tcg_WhileTig(tcg, idx) ps_WhileLoop((tcg)->tig_list, (idx))
 #define tcg_GetTig(tcg, idx) ((tig_t *)ps_Get((tcg)->tig_list, (idx)))
@@ -181,6 +157,64 @@ void seg_Close(seg_t *seg);
 #define tcg_WhileSeg(tcg, idx) ps_WhileLoop((tcg)->seg_list, (idx))
 #define tcg_GetSeg(tcg, idx) ((seg_t *)ps_Get((tcg)->seg_list, (idx)))
 #define tcg_SetSeg(tcg, idx, seg) (ps_Set((tcg)->seg_list, (idx), (void *)(seg)))
+
+/*========================================*/
+/* tcg_util.c */
+
+int tce_strset(char **s, const char *t);
+int is_intersection(long a0, long a1, long b0, long b1);
+int is_rectangle_intersection(const rect_t *a, const rect_t *b);
+void clear_rectangle(rect_t *r);
+void invalid_rectangle(rect_t *r);
+void expand_rectangle(rect_t *to_be_expanded, const rect_t *r);
+
+/*========================================*/
+/* tcg_tig.c (Tool In Graph) */
+
+tig_t *tig_Open(const char *name);
+void tig_Close(tig_t *tig);
+int tig_SetName(tig_t *tig, const char *s);
+
+long tig_GetWidth(tig_t *tig);
+long tig_GetHeight(tig_t *tig);
+
+void tig_Select(tig_t *tig);
+void tig_Deselect(tig_t *tig);
+void tig_StartMove(tig_t *tig);
+void tig_ApplyMove(tig_t *tig, long delta_x, long delta_y);
+void tig_AbortMove(tig_t *tig);
+void tig_FinishMove(tig_t *tig);
+
+int tcg_AddPlainTig(tcg_t *tcg);
+void tcg_DeleteTig(tcg_t *tcg, int idx);
+int tcg_AddTig(tcg_t *tcg, const char *name, long x, long y);
+int tcg_IsTigSelected(tcg_t *tcg, int idx);
+void tcg_SelectTig(tcg_t *tcg, int idx);
+void tcg_DeselectTig(tcg_t *tcg, int idx);
+
+
+/*========================================*/
+/* tcg_aig.c (Artefact In Graph) */
+
+aig_t *aig_Open(void);
+void aig_Close(aig_t *aig);
+
+int tcg_AddPlainAig(tcg_t *tcg);
+int tcg_AddAig(tcg_t *tcg, int tig_src, int dir_src, int pos_src, int tig_dest, int dir_dest, int pos_dest);
+
+/*========================================*/
+/* tcg_seg.c (Segment of the path of an artefact */
+seg_t *seg_Open(void);
+void seg_Close(seg_t *seg);
+
+
+/*========================================*/
+/* tcg procedures */
+
+#define TCG_CONNECT_GRID_SIZE 6
+#define TCG_CONNECT_HALF_WIDTH 2
+
+
 
 void tgc_CalculateDimension(tcg_t *tcg);
 long tgc_GetGraphXFromView(tcg_t *tcg, double x);
