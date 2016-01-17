@@ -29,9 +29,10 @@
 #include <string.h>
 #include <stdio.h>
 
-#define TCG_RECT_STYLE_TIG 0
-#define TCG_RECT_STYLE_TIG_CONNECTOR 1
-#define TCG_RECT_STYLE_SEG 2
+#define TCG_RECT_STYLE_CATCH_AREA 0
+#define TCG_RECT_STYLE_TIG 1
+#define TCG_RECT_STYLE_TIG_CONNECTOR 2
+#define TCG_RECT_STYLE_SEG 3
 
 
 static void tcg_DrawRect(tcg_t *tcg, rect_t *r, int style, int is_selected, int is_catched, cairo_t *c)
@@ -43,7 +44,15 @@ static void tcg_DrawRect(tcg_t *tcg, rect_t *r, int style, int is_selected, int 
 	y1 =  tgc_GetViewYFromGraph(tcg, r->y1);
 	
 
-	if ( style == TCG_RECT_STYLE_TIG )
+	if ( style == TCG_RECT_STYLE_CATCH_AREA )
+	{
+		cairo_set_source_rgba (c, 1.0, 0.0, 0.0, 0.5);
+		cairo_set_line_width (c, 3);
+		cairo_new_path(c);
+		cairo_rectangle(c, x0, y0, x1-x0, y1-y0);
+		cairo_stroke (c);	
+	}
+	else if ( style == TCG_RECT_STYLE_TIG )
 	{
 		cairo_set_source_rgb (c, 0.7, 0.7, 0.7);
 		cairo_rectangle (c, x0+1.0, y0+1.0, x1-x0-2.0, y1-y0-2.0);
@@ -88,6 +97,29 @@ static void tcg_DrawRect(tcg_t *tcg, rect_t *r, int style, int is_selected, int 
 		}
 		cairo_rectangle (c, x0, y0, x1-x0, y1-y0);
 		cairo_stroke (c);				
+	}
+	else if ( style == TCG_RECT_STYLE_SEG )
+	{
+		cairo_set_source_rgb (c, 0.7, 0.7, 0.7);
+		if ( is_selected )
+		{
+			cairo_set_source_rgb (c, 1.0, 0.0, 0.0);
+		}
+		else
+		{
+			cairo_set_source_rgb (c, 0, 0, 0);
+		}
+		if ( is_catched )
+		{
+			cairo_set_line_width (c, 3* tcg->tcgv->zoom);
+		}
+		else
+		{
+			cairo_set_line_width (c, 1* tcg->tcgv->zoom);			
+		}
+		cairo_rectangle (c, x0, y0, x1-x0, y1-y0);
+		cairo_fill(c);
+		//cairo_stroke (c);				
 	}
 	
 	
@@ -153,7 +185,7 @@ void tcg_DrawAig(tcg_t *tcg, int aig_idx, cairo_t *c)
 		
 		tcg_DrawRect(tcg, 
 			&r, 
-			TCG_RECT_STYLE_TIG_CONNECTOR, 
+			TCG_RECT_STYLE_SEG, 
 			/* selected */ 1,  
 			/* catched */ 1, 
 			c);
@@ -179,22 +211,13 @@ void tcg_RedrawAll(tcg_t *tcg, cairo_t *c)
 	
 	if ( tcg_IsCatchAreaVisible(tcg) )
 	{
-		double x0, x1, y0, y1; 
 		
-		x0 = tgc_GetViewXFromGraph(tcg, tcg->catch_area.x0);
-		x1 = tgc_GetViewXFromGraph(tcg, tcg->catch_area.x1);
-		y0 = tgc_GetViewYFromGraph(tcg, tcg->catch_area.y0);
-		y1 = tgc_GetViewYFromGraph(tcg, tcg->catch_area.y1);
-		
-		// printf("catch area: x0=%lf x1=%lf y0=%lf y1=%lf\n", x0, x1, y0, y1);
-
-		
-		cairo_set_source_rgba (c, 1.0, 0.0, 0.0, 0.5);
-		cairo_set_line_width (c, 3);
-		cairo_new_path(c);
-		cairo_rectangle(c, x0, y0, x1-x0, y1-y0);
-		cairo_stroke (c);	
-		
+		tcg_DrawRect(tcg, 
+			&(tcg->catch_area), 
+			TCG_RECT_STYLE_CATCH_AREA, 
+			0,  
+			0, 
+			c);
 	}
 }
 
