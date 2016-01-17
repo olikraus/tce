@@ -207,12 +207,46 @@ int tcg_AddAig(tcg_t *tcg, int tig_src, int dir_src, int pos_src, int tig_dest, 
 seg_t *seg_Open(void);
 void seg_Close(seg_t *seg);
 
+int tcg_AddSeg(tcg_t *tcg, int aig_idx, int seg_seq_no);
+void tcg_DeleteSegPathByAig(tcg_t *tcg, int aig_idx);
+
+/*========================================*/
+/* tcg_connect.c */
+#define TCG_CONNECT_GRID_SIZE 6
+#define TCG_CONNECT_HALF_WIDTH 2
+int tcg_GetConnectCnt(tcg_t *tcg, int idx, int dir);
+long tcg_GetConnectDeltaPos(tcg_t *tcg, int idx, int dir, int pos);
+long tcg_GetConnectPosX(tcg_t *tcg, int idx, int dir, int pos);
+long tcg_GetConnectPosY(tcg_t *tcg, int idx, int dir, int pos);
+int tcg_GetCatchedConnect(tcg_t *tcg, int idx, int *dir_p, int *pos_p);
+int tcg_GetCatchedConnectRect(tcg_t *tcg, int tig_idx, rect_t *r);
+
+
+/*========================================*/
+/* tcg_path.c */
+
+#define TCG_PATH_HALF_WIDTH 2
+
+int tcg_GetAigPointCnt(tcg_t *tcg, int aig_idx);
+long tcg_GetAigPointX(tcg_t *tcg, int aig_idx, int pnt_idx);
+long tcg_GetAigPointY(tcg_t *tcg, int aig_idx, int pnt_idx);
+
+int tcg_GetAigSegCnt(tcg_t *tcg, int aig_idx);
+long tcg_GetAigSegStartPointX(tcg_t *tcg, int aig_idx, int seg_idx);
+long tcg_GetAigSegEndPointX(tcg_t *tcg, int aig_idx, int seg_idx);
+long tcg_GetAigSegStartPointY(tcg_t *tcg, int aig_idx, int seg_idx);
+long tcg_GetAigSegEndPointY(tcg_t *tcg, int aig_idx, int seg_idx);
+int tcg_IsAigSegVertical(tcg_t *tcg, int aig_idx, int seg_idx);
+void tcg_GetAigSegRect(tcg_t *tcg, int aig_idx, int seg_idx, rect_t *r);
+
+
+
+void tcg_ShowAigPoints(tcg_t *tcg, int aig_idx);
+void tcg_CalculateAigPath(tcg_t *tcg, int idx);
 
 /*========================================*/
 /* tcg procedures */
 
-#define TCG_CONNECT_GRID_SIZE 6
-#define TCG_CONNECT_HALF_WIDTH 2
 
 
 
@@ -224,9 +258,7 @@ double tgc_GetViewYFromGraph(tcg_t *tcg, long y);
 
 tcg_t *tcg_Open(void);
 void tcg_Close(tcg_t *tcg);
-void tcg_DeleteTig(tcg_t *tcg, int idx);
-int tcg_AddTig(tcg_t *tcg, const char *name, long x, long y);
-int tcg_AddAig(tcg_t *tcg, int eig_src, int dir_src, int pos_src, int eig_dest, int dir_dest, int pos_dest);
+
 
 int tcg_CatchElement(tcg_t *tcg, double x, double y);
 int tcg_IsCatched(tcg_t *tcg, int idx);
@@ -235,17 +267,4 @@ int tcg_SendEventWithGraphPosition(tcg_t *tcg, int event, long x, long y);
 int tcg_SendEventWithViewPosition(tcg_t *tcg, int event, double x, double y);
 
 
-/* tcg_connect.c */
-int tcg_GetConnectCnt(tcg_t *tcg, int idx, int dir);
-long tcg_GetConnectDeltaPos(tcg_t *tcg, int idx, int dir, int pos);
-long tcg_GetConnectPosX(tcg_t *tcg, int idx, int dir, int pos);
-long tcg_GetConnectPosY(tcg_t *tcg, int idx, int dir, int pos);
-int tcg_GetCatchedConnect(tcg_t *tcg, int idx, int *dir_p, int *pos_p);
 
-/* tcg_path.c */
-int tcg_GetAigPointCnt(tcg_t *tcg, int aig_idx);
-long tcg_GetAigPointX(tcg_t *tcg, int aig_idx, int pnt_idx);
-long tcg_GetAigPointY(tcg_t *tcg, int aig_idx, int pnt_idx);
-
-void tcg_ShowAigPoints(tcg_t *tcg, int aig_idx);
-void tcg_CalculateAigPath(tcg_t *tcg, int idx);

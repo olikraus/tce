@@ -27,6 +27,9 @@
 #include <stdio.h>
 
 
+void tcg_RedrawAll(tcg_t *tcg, cairo_t *c); 	/* tce_draw.c */
+
+
 GtkBuilder *builder; 
 GtkLabel *zoom_value;
 GtkScrollbar *da_h_scrollbar;
@@ -107,143 +110,6 @@ void tcg_UpdateZoomValue(tcg_t *tcg)
 	gtk_label_set_label (zoom_value, s);
 }
 
-void tcg_DrawTig(tcg_t *tcg, int idx, cairo_t *c)
-{
-	tig_t *tig;
-	double x0, x1, y0, y1;
-	double x, y;
-	int dir, pos, cnt;
-	
-	cairo_text_extents_t extents;
-
-	
-	
-	tig = tcg_GetTig(tcg, idx);
-
-	
-	x0 =  tgc_GetViewXFromGraph(tcg, tig->area.x0);
-	x1 =  tgc_GetViewXFromGraph(tcg, tig->area.x1);
-	y0 =  tgc_GetViewYFromGraph(tcg, tig->area.y0);
-	y1 =  tgc_GetViewYFromGraph(tcg, tig->area.y1);
-
-	// printf("tcg_DrawTig: dx=%ld dy=%ld    x0=%ld x1=%ld y0=%ld y1=%ld    x0=%lf x1=%lf y0=%lf y1=%lf\n", tcg->tcgv->x, tcg->tcgv->y, tig->area.x0, tig->area.x1, tig->area.y0, tig->area.y1, x0, x1, y0, y1);
-
-	cairo_set_source_rgb (c, 0.7, 0.7, 0.7);
-	cairo_rectangle (c, x0+1.0, y0+1.0, x1-x0-2.0, y1-y0-2.0);
-	cairo_fill(c);
-	
-	if ( tcg_IsTigSelected(tcg, idx) )
-	{
-		cairo_set_source_rgb (c, 1.0, 0.0, 0.0);
-	}
-	else
-	{
-		cairo_set_source_rgb (c, 0, 0, 0);
-	}
-	
-	
-	if ( tcg_IsCatched(tcg, idx) )
-	{
-		cairo_set_line_width (c, 3* tcg->tcgv->zoom);
-	}
-	else
-	{
-		cairo_set_line_width (c, 1* tcg->tcgv->zoom);
-	}
-	cairo_rectangle (c, x0, y0, x1-x0, y1-y0);
-	cairo_stroke (c);
-	
-
-	/*
-	for( dir = 0; dir < 4; dir++ )
-	{
-		cnt = tcg_GetConnectCnt(tcg, idx, dir);
-		printf("cnt = %d\n", cnt);
-		for ( pos = 0; pos < cnt; pos++ )
-		{
-			x = tgc_GetViewXFromGraph(tcg, tcg_GetConnectPosX(tcg, idx, dir, pos));
-			y = tgc_GetViewYFromGraph(tcg, tcg_GetConnectPosY(tcg, idx, dir, pos));
-			//printf("cnt = %d   x=%lf y=%lf\n", cnt, x, y);
-			
-			cairo_rectangle (c, x-1, y-1, 3, 3);
-			cairo_stroke (c);
-		}
-	}
-	*/
-	
-	if ( tcg_GetCatchedConnect(tcg, idx, &dir, &pos) )
-	{
-		x = tgc_GetViewXFromGraph(tcg, tcg_GetConnectPosX(tcg, idx, dir, pos));
-		y = tgc_GetViewYFromGraph(tcg, tcg_GetConnectPosY(tcg, idx, dir, pos));
-		cairo_rectangle (c, x-TCG_CONNECT_HALF_WIDTH, y-TCG_CONNECT_HALF_WIDTH, 2*TCG_CONNECT_HALF_WIDTH+1, 2*TCG_CONNECT_HALF_WIDTH+1);
-		cairo_stroke (c);
-	}
-	
-
-	
-	
-	cairo_new_path(c);
-	cairo_select_font_face (c, "sans-serif",  CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-	cairo_set_font_size (c, 10* tcg->tcgv->zoom);
-	cairo_set_source_rgb (c, 0, 0, 0);
-	cairo_text_extents (c, "Test", &extents);
-	
-	/* center text within the area */
-	cairo_move_to(c, x0 + ((x1-x0)-extents.width)/2 /* - extents.x_bearing */ , y0 + ((y1-y0)-extents.height)/2 - extents.y_bearing );
-	cairo_show_text (c, "Test");
-	
-	
-}
-
-void tcg_RedrawAll(tcg_t *tcg, cairo_t *c)
-{
-	int i;
-	
-	i = -1;
-	while( tcg_WhileTig(tcg, &i) )
-	{
-		tcg_DrawTig(tcg, i, c);
-	}
-	
-	/* intermediate line drawing, will be removed */
-	i = -1;
-	while( tcg_WhileAig(tcg, &i)  )
-	{
-		int j, cnt;
-		cnt = tcg_GetAigPointCnt(tcg, i);
-		
-		cairo_set_source_rgba (c, 0.0, 0.0, 1.0, 1.0);
-		cairo_set_line_width (c, 1);
-		cairo_new_path(c);
-		cairo_move_to(c, tgc_GetViewXFromGraph(tcg, tcg_GetAigPointX(tcg, i, 0)), tgc_GetViewYFromGraph(tcg, tcg_GetAigPointY(tcg, i, 0)));
-		
-		for( j = 1; j < cnt; j++ )
-		{
-			cairo_line_to(c, tgc_GetViewXFromGraph(tcg, tcg_GetAigPointX(tcg, i, j)), tgc_GetViewYFromGraph(tcg, tcg_GetAigPointY(tcg, i, j)));
-		}
-		cairo_stroke (c);	
-	}
-	
-	if ( tcg_IsCatchAreaVisible(tcg) )
-	{
-		double x0, x1, y0, y1; 
-		
-		x0 = tgc_GetViewXFromGraph(tcg, tcg->catch_area.x0);
-		x1 = tgc_GetViewXFromGraph(tcg, tcg->catch_area.x1);
-		y0 = tgc_GetViewYFromGraph(tcg, tcg->catch_area.y0);
-		y1 = tgc_GetViewYFromGraph(tcg, tcg->catch_area.y1);
-		
-		// printf("catch area: x0=%lf x1=%lf y0=%lf y1=%lf\n", x0, x1, y0, y1);
-
-		
-		cairo_set_source_rgba (c, 1.0, 0.0, 0.0, 0.5);
-		cairo_set_line_width (c, 3);
-		cairo_new_path(c);
-		cairo_rectangle(c, x0, y0, x1-x0, y1-y0);
-		cairo_stroke (c);	
-		
-	}
-}
 
 /*==============================================================*/
 /* signal handler */

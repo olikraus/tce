@@ -117,6 +117,107 @@ long tcg_GetAigPointY(tcg_t *tcg, int aig_idx, int pnt_idx)
 
 }
 
+int tcg_GetAigSegCnt(tcg_t *tcg, int aig_idx)
+{
+	aig_t *aig;
+	aig = tcg_GetAig(tcg, aig_idx);
+	
+	return aig->dfv_cnt+2;
+}
+
+long tcg_GetAigSegStartPointX(tcg_t *tcg, int aig_idx, int seg_idx)
+{
+	return tcg_GetAigPointX(tcg, aig_idx, seg_idx);
+}
+
+long tcg_GetAigSegEndPointX(tcg_t *tcg, int aig_idx, int seg_idx)
+{
+	return tcg_GetAigPointX(tcg, aig_idx, seg_idx+1);
+}
+
+long tcg_GetAigSegStartPointY(tcg_t *tcg, int aig_idx, int seg_idx)
+{
+	return tcg_GetAigPointY(tcg, aig_idx, seg_idx);
+}
+
+long tcg_GetAigSegEndPointY(tcg_t *tcg, int aig_idx, int seg_idx)
+{
+	return tcg_GetAigPointY(tcg, aig_idx, seg_idx+1);
+}
+
+int tcg_IsAigSegVertical(tcg_t *tcg, int aig_idx, int seg_idx)
+{
+	int is_vertical;
+	aig_t *aig;
+	aig = tcg_GetAig(tcg, aig_idx);
+	
+	is_vertical = aig->dir_src;
+	is_vertical += seg_idx;
+	is_vertical &= 1;
+	
+	/* this should be identical to aig->dfs_list[seg_idx-1].is_vertical */	
+	return is_vertical;
+}
+
+void tcg_GetAigSegRect(tcg_t *tcg, int aig_idx, int seg_idx, rect_t *r)
+{
+	long a, b;
+	if ( tcg_IsAigSegVertical(tcg, aig_idx, seg_idx) == 0 )
+	{
+		/* horizontal */
+		r->y0 = tcg_GetAigSegStartPointY(tcg, aig_idx, seg_idx);
+		r->y1 = r->y0;
+		
+		r->y0 -= TCG_PATH_HALF_WIDTH;
+		r->y1 += TCG_PATH_HALF_WIDTH;
+
+		a = tcg_GetAigSegStartPointX(tcg, aig_idx, seg_idx);
+		b = tcg_GetAigSegEndPointX(tcg, aig_idx, seg_idx);
+		if ( a < b ) 
+		{
+			r->x0 = a;
+			r->x1 = b;
+		}
+		else
+		{
+			r->x0 = b;
+			r->x1 = a;
+		}
+		
+		r->x0 -= TCG_PATH_HALF_WIDTH;
+		r->x1 += TCG_PATH_HALF_WIDTH;
+	}
+	else
+	{
+		/* vertical */
+
+		r->x0 = tcg_GetAigSegStartPointX(tcg, aig_idx, seg_idx);
+		r->x1 = r->x0;
+		
+		r->x0 -= TCG_PATH_HALF_WIDTH;
+		r->x1 += TCG_PATH_HALF_WIDTH;
+
+		a = tcg_GetAigSegStartPointY(tcg, aig_idx, seg_idx);
+		b = tcg_GetAigSegEndPointY(tcg, aig_idx, seg_idx);
+		if ( a < b ) 
+		{
+			r->y0 = a;
+			r->y1 = b;
+		}
+		else
+		{
+			r->y0 = b;
+			r->y1 = a;
+		}
+		r->y0 -= TCG_PATH_HALF_WIDTH;
+		r->y1 += TCG_PATH_HALF_WIDTH;
+	}
+}
+
+
+
+
+
 
 #ifdef OBSOLETE
 long tcg_GetAigPointX(tcg_t *tcg, int aig_idx, int pnt_idx)
@@ -284,44 +385,5 @@ void tcg_CalculateAigPath(tcg_t *tcg, int idx)
 	{
 		tcg_CalculateAigEdgePath(tcg, idx);
 	}
-}
-
-/* returns position or -1 */
-int tcg_AddPlainSeg(tcg_t *tcg)
-{
-	seg_t *seg;
-	int idx;
-	seg = seg_Open();
-	if ( seg != NULL )
-	{
-		idx = ps_Add(tcg->seg_list, seg);
-		if ( idx >= 0 )
-		{
-			return idx;
-		}
-		seg_Close(seg);
-	}
-	return -1;
-}
-
-/*
-  delete all segments which belong to the speciofied artefact index
-*/
-void tcg_DeleteSegPathByAig(tcg_t *tcg, int aig_idx)
-{
-	int i;
-	seg_t *seg;
-	
-	i = -1;
-	while( tcg_WhileSeg(tcg, &i) )
-	{
-		seg = tcg_GetSeg(tcg, i);
-		if ( seg->aig_idx == aig_idx )
-		{
-		  seg_Close(seg);
-		  ps_Del(tcg->seg_list, i);
-		}
-	}
-  
 }
 

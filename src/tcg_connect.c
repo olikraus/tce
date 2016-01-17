@@ -212,3 +212,23 @@ int tcg_GetCatchedConnect(tcg_t *tcg, int idx, int *dir_p, int *pos_p)
 	return 0;
 }
 
+int tcg_GetCatchedConnectRect(tcg_t *tcg, int tig_idx, rect_t *r)
+{
+	int dir, pos;
+	long x, y;
+	if ( tcg_GetCatchedConnect(tcg, tig_idx, &dir, &pos) != 0 )
+	{
+		x = tcg_GetConnectPosX(tcg, tig_idx, dir, pos);
+		y = tcg_GetConnectPosY(tcg, tig_idx, dir, pos);
+		r->x0 = x-TCG_CONNECT_HALF_WIDTH;
+		r->x1 = x+TCG_CONNECT_HALF_WIDTH;
+		r->y0 = y-TCG_CONNECT_HALF_WIDTH;
+		r->y1 = y+TCG_CONNECT_HALF_WIDTH;
+		return 1;
+	}
+	return 0;
+}
+
+
+
+
