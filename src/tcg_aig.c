@@ -115,3 +115,18 @@ int tcg_AddAig(tcg_t *tcg, int tig_src, int dir_src, int pos_src, int tig_dest, 
 	}
 	return -1;
 }
+
+
+void tcg_DeselectAig(tcg_t *tcg, int aig_idx)
+{
+	aig_t *aig;
+	int i, cnt;
+	aig = tcg_GetAig(tcg, aig_idx);
+	
+	cnt = aig->dfv_cnt;
+	for( i = 0; i < cnt; i++ )
+	{
+		aig->dfv_list[i].is_selected = 0;
+	}
+}
+

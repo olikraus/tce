@@ -202,23 +202,44 @@ void tcg_DeselectAll(tcg_t *tcg)
 	{
 		tcg_DeselectTig(tcg, i);
 	}
+	
+	i = -1;
+	while( tcg_WhileAig(tcg, &i) )
+	{
+		tcg_DeselectAig(tcg, i);
+	}
 }
 
 
 
 void tcg_AddCatchedToSelection(tcg_t *tcg)
 {
-	tig_t *tig;
-	int i;
+	//tig_t *tig;
+	int i, j, cnt;
+	
+
 	i = -1;
 	while( tcg_WhileTig(tcg, &i) )
 	{
 		if ( tcg_IsTigCatched(tcg, i) != 0 )
 		{
-			tig = tcg_GetTig(tcg, i);
-			tig_Select(tig);
+			tcg_SelectTig(tcg, i);
 		}
 	}
+	
+	i = -1;
+	while( tcg_WhileAig(tcg, &i) )
+	{
+		cnt = tcg_GetAigSegCnt(tcg, i);
+		for ( j = 0; j < cnt; j++ )
+		{
+			if ( tcg_IsAigSegCatched(tcg, i, j) != 0 )
+			{
+				tcg_SelectAigSeg(tcg, i, j);
+			}
+		}
+	}
+	
 }
 
 

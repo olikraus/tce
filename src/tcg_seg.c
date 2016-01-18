@@ -2,6 +2,8 @@
 
 	tcg_seg.c
 	
+	OBSOLETE
+	
 	Tool Chain Editor, path segment related function
 	Copyright (C) 2016 olikraus@gmail.com
 

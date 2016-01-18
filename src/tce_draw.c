@@ -186,7 +186,7 @@ void tcg_DrawAig(tcg_t *tcg, int aig_idx, cairo_t *c)
 		tcg_DrawRect(tcg, 
 			&r, 
 			TCG_RECT_STYLE_SEG, 
-			/* selected */ 1,  
+			/* selected */ tcg_IsAigSegSelected(tcg, aig_idx, j), 
 			/* catched */ tcg_IsAigSegCatched(tcg, aig_idx, j), 
 			c);
 	}

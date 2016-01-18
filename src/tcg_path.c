@@ -227,8 +227,53 @@ int tcg_IsAigSegCatched(tcg_t *tcg, int aig_idx, int seg_idx)
 	return is_rectangle_intersection(&r, &(tcg->catch_area));
 }
 
+/* mark the segment as selected */
+void tcg_SelectAigSeg(tcg_t *tcg, int aig_idx, int seg_idx)
+{
+	aig_t *aig;
+	aig = tcg_GetAig(tcg, aig_idx);
 
+	/* there is no selection for the first and last segment (they are fixed to the tig) */
+	if ( seg_idx == 0 )
+		return;
+	seg_idx--;
+	if ( seg_idx >= aig->dfv_cnt )
+		return;
+	aig->dfv_list[seg_idx].is_selected = 1;
+}
 
+int tcg_IsAigSegSelected(tcg_t *tcg, int aig_idx, int seg_idx)
+{
+	aig_t *aig;
+	aig = tcg_GetAig(tcg, aig_idx);
+
+	/* there is no selection for the first and last segment (they are fixed to the tig) */
+	if ( seg_idx == 0 )
+		return 0;
+	seg_idx--;
+	if ( seg_idx >= aig->dfv_cnt )
+		return 0;
+	return aig->dfv_list[seg_idx].is_selected;
+}
+
+void tcg_StartAigSegMove(tcg_t *tcg, int aig_idx, int seg_idx)
+{
+	aig_t *aig;
+	aig = tcg_GetAig(tcg, aig_idx);
+
+	/* nothing for first and last segment */
+	if ( seg_idx == 0 )
+		return;
+	seg_idx--;
+	if ( seg_idx >= aig->dfv_cnt )
+		return;
+	aig->dfv_list[seg_idx].move_start_v = aig->dfv_list[seg_idx].v;
+}
+
+void tcg_ApplyAigSegMove(tcg_t *tcg, int aig_idx, int seg_idx, long x, long y)
+{
+
+}
 
 
 #ifdef OBSOLETE
@@ -270,11 +315,6 @@ void tcg_CalculateAigParallelPath(tcg_t *tcg, int idx)
 {
 	int dir;
 	aig_t *aig;
-	//tig_t *eig_src;
-	//tig_t *eig_dest;
-	
-	//eig_src = tcg_GetTig(tcg, aig->tig_src);
-	//eig_dest = tcg_GetTig(tcg, aig->tig_dest);
 	
 	aig = tcg_GetAig(tcg, idx);
 	/* aig->dir_src == aig->dir_dest */
@@ -397,5 +437,8 @@ void tcg_CalculateAigPath(tcg_t *tcg, int idx)
 	{
 		tcg_CalculateAigEdgePath(tcg, idx);
 	}
+	
+	/* finally, ensure that all is deselected */
+	tcg_DeselectAig(tcg, idx);
 }
 

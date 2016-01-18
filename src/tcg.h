@@ -64,9 +64,11 @@ struct tig_struct
 struct dfv_struct
 {
 	long v;		/* current value */
+	long move_start_v;
 	long min;	/* v >= min, OBSOLETE */
 	long max;	/* v <= max, OBSOLETE */
 	int is_vertical;
+	unsigned int is_selected;
 };
 typedef struct dfv_struct dfv_t;
 
@@ -109,7 +111,7 @@ struct tcg_struct
 {
 	ps_t *tig_list;
 	ps_t *aig_list;
-	ps_t *seg_list;
+	ps_t *seg_list;		/* OBSOLETE */
   
 	/* dimensions of the graph */
 	rect_t graph_dimension;
@@ -195,23 +197,6 @@ void tcg_DeselectTig(tcg_t *tcg, int idx);
 int tcg_IsTigCatched(tcg_t *tcg, int idx);
 
 /*========================================*/
-/* tcg_aig.c (Artefact In Graph) */
-
-aig_t *aig_Open(void);
-void aig_Close(aig_t *aig);
-
-int tcg_AddPlainAig(tcg_t *tcg);
-int tcg_AddAig(tcg_t *tcg, int tig_src, int dir_src, int pos_src, int tig_dest, int dir_dest, int pos_dest);
-
-/*========================================*/
-/* tcg_seg.c (Segment of the path of an artefact */
-seg_t *seg_Open(void);
-void seg_Close(seg_t *seg);
-
-int tcg_AddSeg(tcg_t *tcg, int aig_idx, int seg_seq_no);
-void tcg_DeleteSegPathByAig(tcg_t *tcg, int aig_idx);
-
-/*========================================*/
 /* tcg_connect.c */
 #define TCG_CONNECT_GRID_SIZE 6
 #define TCG_CONNECT_HALF_WIDTH 2
@@ -221,6 +206,25 @@ long tcg_GetConnectPosX(tcg_t *tcg, int idx, int dir, int pos);
 long tcg_GetConnectPosY(tcg_t *tcg, int idx, int dir, int pos);
 int tcg_GetCatchedConnect(tcg_t *tcg, int idx, int *dir_p, int *pos_p);
 int tcg_GetCatchedConnectRect(tcg_t *tcg, int tig_idx, rect_t *r);
+
+/*========================================*/
+/* tcg_aig.c (Artefact In Graph) */
+
+aig_t *aig_Open(void);
+void aig_Close(aig_t *aig);
+
+int tcg_AddPlainAig(tcg_t *tcg);
+int tcg_AddAig(tcg_t *tcg, int tig_src, int dir_src, int pos_src, int tig_dest, int dir_dest, int pos_dest);
+void tcg_DeselectAig(tcg_t *tcg, int aig_idx);
+
+/*========================================*/
+/* tcg_seg.c (Segment of the path of an artefact */
+seg_t *seg_Open(void);
+void seg_Close(seg_t *seg);
+
+int tcg_AddSeg(tcg_t *tcg, int aig_idx, int seg_seq_no);
+void tcg_DeleteSegPathByAig(tcg_t *tcg, int aig_idx);
+
 
 
 /*========================================*/
@@ -240,7 +244,10 @@ long tcg_GetAigSegEndPointY(tcg_t *tcg, int aig_idx, int seg_idx);
 int tcg_IsAigSegVertical(tcg_t *tcg, int aig_idx, int seg_idx);
 void tcg_GetAigSegRect(tcg_t *tcg, int aig_idx, int seg_idx, rect_t *r);
 int tcg_IsAigSegCatched(tcg_t *tcg, int aig_idx, int seg_idx);
-
+void tcg_SelectAigSeg(tcg_t *tcg, int aig_idx, int seg_idx);
+int tcg_IsAigSegSelected(tcg_t *tcg, int aig_idx, int seg_idx);
+void tcg_StartAigSegMove(tcg_t *tcg, int aig_idx, int seg_idx);
+void tcg_ApplyAigSegMove(tcg_t *tcg, int aig_idx, int seg_idx, long x, long y); /* not yet written */
 
 void tcg_ShowAigPoints(tcg_t *tcg, int aig_idx);
 void tcg_CalculateAigPath(tcg_t *tcg, int idx);
