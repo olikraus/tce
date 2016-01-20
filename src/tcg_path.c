@@ -242,6 +242,20 @@ void tcg_SelectAigSeg(tcg_t *tcg, int aig_idx, int seg_idx)
 	aig->dfv_list[seg_idx].is_selected = 1;
 }
 
+void tcg_DeselectAigSeg(tcg_t *tcg, int aig_idx, int seg_idx)
+{
+	aig_t *aig;
+	aig = tcg_GetAig(tcg, aig_idx);
+
+	/* there is no selection for the first and last segment (they are fixed to the tig) */
+	if ( seg_idx == 0 )
+		return;
+	seg_idx--;
+	if ( seg_idx >= aig->dfv_cnt )
+		return;
+	aig->dfv_list[seg_idx].is_selected = 0;
+}
+
 int tcg_IsAigSegSelected(tcg_t *tcg, int aig_idx, int seg_idx)
 {
 	aig_t *aig;
@@ -272,7 +286,29 @@ void tcg_StartAigSegMove(tcg_t *tcg, int aig_idx, int seg_idx)
 
 void tcg_ApplyAigSegMove(tcg_t *tcg, int aig_idx, int seg_idx, long x, long y)
 {
+	aig_t *aig;
+	long v;
+	aig = tcg_GetAig(tcg, aig_idx);
 
+	/* nothing for first and last segment */
+	if ( seg_idx == 0 )
+		return;
+
+	seg_idx--;
+	if ( seg_idx >= aig->dfv_cnt )
+		return;
+
+	/* based on the orientation of the segment, use x or y */
+	v = aig->dfv_list[seg_idx].move_start_v;
+	if ( aig->dfv_list[seg_idx].is_vertical == 0 )
+	{
+		v += y;
+	}
+	else
+	{
+		v += x;
+	}
+	aig->dfv_list[seg_idx].v = v;		
 }
 
 

@@ -242,24 +242,79 @@ void tcg_AddCatchedToSelection(tcg_t *tcg)
 	
 }
 
-
+/*
+	Check if x/y is above tig or aig segment.
+	Store the result in 
+		tcg->tig_idx
+		tcg->aig_idx 
+		tcg->seg_pos
+	return 0 if there is no element (tig or segment) at x/y.
+*/
 int tcg_GetElementOverPosition(tcg_t *tcg, long x, long y)
 {
 	tig_t *tig;
-	int i;
+	rect_t r;
+	int i, j, cnt;
+	
+	tcg->tig_idx = -1;
+	tcg->aig_idx = -1;
+	tcg->seg_pos = -1;
+	
+	
 	i = -1;
 	while( tcg_WhileTig(tcg, &i) )
 	{
 		tig = tcg_GetTig(tcg, i);
 		if ( (tig->area.x0 <= x && x <= tig->area.x1) && (tig->area.y0 <= y && y <= tig->area.y1) )
 		{
-			return i;
+			tcg->tig_idx = i;
+			return 1;
 		}
 	}
-	return -1;
+	
+	i = -1;
+	while( tcg_WhileAig(tcg, &i) )
+	{
+		cnt = tcg_GetAigSegCnt(tcg, i)-1;
+		for ( j = 1; j < cnt; j++ )
+		{
+			tcg_GetAigSegRect(tcg, i, j, &r);
+			if ( (r.x0 <= x && x <= r.x1) && (r.y0 <= y && y <= r.y1) )
+			{
+				tcg->aig_idx = i;
+				tcg->seg_pos = j;
+				return 1;
+			}
+		}
+	}
+	
+	return 0;
 }
 
+int tcg_IsElementSelected(tcg_t *tcg)
+{
+	if ( tcg->tig_idx >= 0 )
+		return tcg_IsTigSelected(tcg, tcg->tig_idx);
+	if ( tcg->aig_idx >= 0 )
+		return tcg_IsAigSegSelected(tcg, tcg->aig_idx, tcg->seg_pos);
+	return 0;
+}
 
+void tcg_SelectElement(tcg_t *tcg)
+{
+	if ( tcg->tig_idx >= 0 )
+		tcg_SelectTig(tcg, tcg->tig_idx);
+	if ( tcg->aig_idx >= 0 )
+		tcg_SelectAigSeg(tcg, tcg->aig_idx, tcg->seg_pos);
+}
+
+void tcg_DeselectElement(tcg_t *tcg)
+{
+	if ( tcg->tig_idx >= 0 )
+		tcg_DeselectTig(tcg, tcg->tig_idx);
+	if ( tcg->aig_idx >= 0 )
+		tcg_DeselectAigSeg(tcg, tcg->aig_idx, tcg->seg_pos);
+}
 
 
 /*========================================*/
@@ -312,7 +367,7 @@ void tcg_SetCatchAreaFromStartToPoint(tcg_t *tcg, long x, long y)
 void tcg_StartMove(tcg_t *tcg)
 {
 	tig_t *tig;
-	int i;
+	int i, j, cnt;
 	i = -1;
 	while( tcg_WhileTig(tcg, &i) )
 	{
@@ -320,13 +375,26 @@ void tcg_StartMove(tcg_t *tcg)
 		if ( tig->is_selected != 0 )
 			tig_StartMove(tig);
 	}
+	
+	i = -1;
+	while( tcg_WhileAig(tcg, &i) )
+	{
+		cnt = tcg_GetAigSegCnt(tcg, i);
+		for ( j = 0; j < cnt; j++ )
+		{
+			if ( tcg_IsAigSegSelected(tcg, i, j) != 0 )
+			{
+				tcg_StartAigSegMove(tcg, i, j);
+			}
+		}
+	}
 	// puts("tcg_StartMove");
 }
 
 void tcg_ApplyMove(tcg_t *tcg, long delta_x, long delta_y)
 {
 	tig_t *tig;
-	int i;
+	int i, j, cnt;
 	i = -1;
 	while( tcg_WhileTig(tcg, &i) )
 	{
@@ -334,6 +402,21 @@ void tcg_ApplyMove(tcg_t *tcg, long delta_x, long delta_y)
 		if ( tig->is_selected != 0 )
 			tig_ApplyMove(tig, delta_x, delta_y);
 	}
+	
+
+	i = -1;
+	while( tcg_WhileAig(tcg, &i) )
+	{
+		cnt = tcg_GetAigSegCnt(tcg, i);
+		for ( j = 0; j < cnt; j++ )
+		{
+			if ( tcg_IsAigSegSelected(tcg, i, j) != 0 )
+			{
+				tcg_ApplyAigSegMove(tcg, i, j, delta_x, delta_y);
+			}
+		}
+	}
+	
 	// printf("tcg_ApplyMove %ld %ld\n", delta_x, delta_y);
 }
 
@@ -346,26 +429,26 @@ void tcg_FinalizeMove(tcg_t *tcg)
 static int tcg_handle_state_idle(tcg_t *tcg, int event , long x, long y)
 {
 	int r = 0;
-	int idx;
 	switch(event)
 	{
 		case TCG_EVENT_BUTTON_DOWN:
-			idx = tcg_GetElementOverPosition(tcg, x, y);
-			if ( idx >= 0 )
+			if ( tcg_GetElementOverPosition(tcg, x, y) )
 			{
 				/* user has done a button press on an element */
 				tcg_SetCatchAreaToPoint(tcg, x, y);
 				/* store the reference position */
 				tcg->start_x = x;				
 				tcg->start_y = y;
-				if ( tcg_IsTigSelected(tcg, idx) != 0 )
+				if ( tcg_IsElementSelected(tcg) != 0 )
 				{
+					puts("TCG_STATE_SELECTON_MOVE");
 					tcg->state = TCG_STATE_SELECTON_MOVE;
 				}
 				else
 				{
 					tcg_DeselectAll(tcg);
-					tcg_SelectTig(tcg, idx);
+					tcg_SelectElement(tcg);
+					puts("TCG_STATE_SINGLE_MOVE");
 					tcg->state = TCG_STATE_SINGLE_MOVE;
 				}				
 				r = 1;	/* catch area change */
@@ -382,19 +465,18 @@ static int tcg_handle_state_idle(tcg_t *tcg, int event , long x, long y)
 			}
 			break;
 		case TCG_EVENT_SHIFT_BUTTON_DOWN:
-			idx = tcg_GetElementOverPosition(tcg, x, y);
-			if ( idx >= 0 )
+			if ( tcg_GetElementOverPosition(tcg, x, y) )
 			{
 				/* shift mouse button press: single element (de)selection */
 				/* state does not change here, change is applied directly */
 				tcg_SetCatchAreaToPoint(tcg, x, y);
-				if ( tcg_IsTigSelected(tcg, idx) != 0 )
+				if ( tcg_IsElementSelected(tcg) != 0 )
 				{
-					tcg_DeselectTig(tcg, idx);
+					tcg_DeselectElement(tcg);
 				}
 				else
 				{
-					tcg_SelectTig(tcg, idx);					
+					tcg_SelectElement(tcg);
 				}
 				r = 1;	/* catch area change and selection change of elemnt(idx) */
 			}
@@ -507,7 +589,7 @@ static int tcg_handle_state_do_catch_area_selection(tcg_t *tcg, int event , long
 static int tcg_handle_state_single_move(tcg_t *tcg, int event , long x, long y)
 {
 	int r;
-	int idx;
+	//int idx;
 	switch(event)
 	{
 		case TCG_EVENT_SHIFT_BUTTON_DOWN:
@@ -518,8 +600,8 @@ static int tcg_handle_state_single_move(tcg_t *tcg, int event , long x, long y)
 		case TCG_EVENT_MOUSE_MOVE:
 			tcg_SetCatchAreaToPoint(tcg, x, y);
 		
-			idx = tcg_GetElementOverPosition(tcg, tcg->start_x, tcg->start_y);
-			if ( idx < 0 )
+			//idx = tcg_GetElementOverPosition(tcg, tcg->start_x, tcg->start_y);
+			if ( tcg_GetElementOverPosition(tcg, tcg->start_x, tcg->start_y) == 0 )
 			{
 				/* something is wrong, this shold not happen */
 				tcg->state = TCG_STATE_IDLE;

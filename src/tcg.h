@@ -125,6 +125,14 @@ struct tcg_struct
 	int state;
 	long start_x;	/* start position of the catch area or movement */
 	long start_y;
+	
+	/* return values of the tcg_GetElementOverPosition function */
+	/* this could be a tig-index or an aig-index with seg_pos */
+	/* The values will be set to -1 if not used */
+	/* the following three values are refered as "element" which is either tig or aig segment */
+	int tig_idx;
+	int aig_idx;
+	int seg_pos;
 };
 
 #define TCG_STATE_IDLE 0
@@ -245,9 +253,10 @@ int tcg_IsAigSegVertical(tcg_t *tcg, int aig_idx, int seg_idx);
 void tcg_GetAigSegRect(tcg_t *tcg, int aig_idx, int seg_idx, rect_t *r);
 int tcg_IsAigSegCatched(tcg_t *tcg, int aig_idx, int seg_idx);
 void tcg_SelectAigSeg(tcg_t *tcg, int aig_idx, int seg_idx);
+void tcg_DeselectAigSeg(tcg_t *tcg, int aig_idx, int seg_idx);
 int tcg_IsAigSegSelected(tcg_t *tcg, int aig_idx, int seg_idx);
 void tcg_StartAigSegMove(tcg_t *tcg, int aig_idx, int seg_idx);
-void tcg_ApplyAigSegMove(tcg_t *tcg, int aig_idx, int seg_idx, long x, long y); /* not yet written */
+void tcg_ApplyAigSegMove(tcg_t *tcg, int aig_idx, int seg_idx, long x, long y); 
 
 void tcg_ShowAigPoints(tcg_t *tcg, int aig_idx);
 void tcg_CalculateAigPath(tcg_t *tcg, int idx);
