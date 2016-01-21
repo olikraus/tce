@@ -312,7 +312,7 @@ void tcg_ApplyAigSegMove(tcg_t *tcg, int aig_idx, int seg_idx, long x, long y)
 }
 
 /* return aig_idx */
-int tcg_StartNewAig(tcg_t *tcg, int tig_src, int dir_src, int pos_src)
+int tcg_StartNewAigPath(tcg_t *tcg, int tig_src, int dir_src, int pos_src)
 {
 	int aig_idx;
 	aig_idx = tcg_AddAig(tcg, tig_src, dir_src, pos_src, -1, -1, -1);

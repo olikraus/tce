@@ -259,6 +259,7 @@ void tcg_DeselectAigSeg(tcg_t *tcg, int aig_idx, int seg_idx);
 int tcg_IsAigSegSelected(tcg_t *tcg, int aig_idx, int seg_idx);
 void tcg_StartAigSegMove(tcg_t *tcg, int aig_idx, int seg_idx);
 void tcg_ApplyAigSegMove(tcg_t *tcg, int aig_idx, int seg_idx, long x, long y); 
+int tcg_StartNewAigPath(tcg_t *tcg, int tig_src, int dir_src, int pos_src);	/* not yet used */
 
 void tcg_ShowAigPoints(tcg_t *tcg, int aig_idx);
 void tcg_CalculateAigPath(tcg_t *tcg, int idx);
