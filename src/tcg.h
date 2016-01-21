@@ -133,6 +133,8 @@ struct tcg_struct
 	int tig_idx;
 	int aig_idx;
 	int seg_pos;
+	int con_dir;
+	int con_pos;
 };
 
 #define TCG_STATE_IDLE 0

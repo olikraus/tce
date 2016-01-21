@@ -311,6 +311,30 @@ void tcg_ApplyAigSegMove(tcg_t *tcg, int aig_idx, int seg_idx, long x, long y)
 	aig->dfv_list[seg_idx].v = v;		
 }
 
+/* return aig_idx */
+int tcg_StartNewAig(tcg_t *tcg, int tig_src, int dir_src, int pos_src)
+{
+	int aig_idx;
+	aig_idx = tcg_AddAig(tcg, tig_src, dir_src, pos_src, -1, -1, -1);
+	if ( aig_idx >= 0 )
+	{
+		aig_t *aig = tcg_GetAig(tcg, aig_idx);
+		
+		aig->dfv_cnt = 1;
+		if ( dir_src == 0 || dir_src == 2 )
+		{
+			aig->dfv_list[0].v = tcg_GetConnectPosX(tcg, tig_src, dir_src, pos_src);
+		}
+		else
+		{
+			aig->dfv_list[0].v = tcg_GetConnectPosY(tcg, tig_src, dir_src, pos_src);
+		}
+		return aig_idx;
+	}	
+	return -1;
+}
+
+
 
 #ifdef OBSOLETE
 long tcg_GetAigPointX(tcg_t *tcg, int aig_idx, int pnt_idx)

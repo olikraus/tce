@@ -259,6 +259,8 @@ int tcg_GetElementOverPosition(tcg_t *tcg, long x, long y)
 	tcg->tig_idx = -1;
 	tcg->aig_idx = -1;
 	tcg->seg_pos = -1;
+	tcg->con_dir = -1;
+	tcg->con_pos = -1;
 	
 	
 	i = -1;
@@ -268,6 +270,8 @@ int tcg_GetElementOverPosition(tcg_t *tcg, long x, long y)
 		if ( (tig->area.x0 <= x && x <= tig->area.x1) && (tig->area.y0 <= y && y <= tig->area.y1) )
 		{
 			tcg->tig_idx = i;
+			
+			tcg_GetCatchedConnect(tcg, i, &(tcg->con_dir), &(tcg->con_pos));
 			return 1;
 		}
 	}
@@ -434,24 +438,32 @@ static int tcg_handle_state_idle(tcg_t *tcg, int event , long x, long y)
 		case TCG_EVENT_BUTTON_DOWN:
 			if ( tcg_GetElementOverPosition(tcg, x, y) )
 			{
-				/* user has done a button press on an element */
-				tcg_SetCatchAreaToPoint(tcg, x, y);
-				/* store the reference position */
-				tcg->start_x = x;				
-				tcg->start_y = y;
-				if ( tcg_IsElementSelected(tcg) != 0 )
+				if ( tcg->con_dir >= 0 && tcg->con_pos >= 0 )
 				{
-					puts("TCG_STATE_SELECTON_MOVE");
-					tcg->state = TCG_STATE_SELECTON_MOVE;
+					r = 1;	/* catch area change */
+					puts("Connector pressed");
 				}
 				else
 				{
-					tcg_DeselectAll(tcg);
-					tcg_SelectElement(tcg);
-					puts("TCG_STATE_SINGLE_MOVE");
-					tcg->state = TCG_STATE_SINGLE_MOVE;
-				}				
-				r = 1;	/* catch area change */
+					/* user has done a button press on an element */
+					tcg_SetCatchAreaToPoint(tcg, x, y);
+					/* store the reference position */
+					tcg->start_x = x;				
+					tcg->start_y = y;
+					if ( tcg_IsElementSelected(tcg) != 0 )
+					{
+						puts("TCG_STATE_SELECTON_MOVE");
+						tcg->state = TCG_STATE_SELECTON_MOVE;
+					}
+					else
+					{
+						tcg_DeselectAll(tcg);
+						tcg_SelectElement(tcg);
+						puts("TCG_STATE_SINGLE_MOVE");
+						tcg->state = TCG_STATE_SINGLE_MOVE;
+					}				
+					r = 1;	/* catch area change */
+				}
 			}
 			else
 			{
