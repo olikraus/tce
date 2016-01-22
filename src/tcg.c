@@ -442,6 +442,15 @@ static int tcg_handle_state_idle(tcg_t *tcg, int event , long x, long y)
 				{
 					r = 1;	/* catch area change */
 					puts("Connector pressed");
+					/* store the reference position */
+					tcg->start_x = x;				
+					tcg->start_y = y;
+					/* start a new path at the connector */
+					tcg->path_aig_idx = tcg_StartNewAigPath(tcg, tcg->tig_idx, tcg->con_dir, tcg->con_pos);
+					
+					/* continue with the state */
+					tcg->state = TCG_STATE_DO_PATH;
+					puts("TCG_STATE_DO_PATH");
 				}
 				else
 				{
@@ -701,6 +710,42 @@ static int tcg_handle_state_do_movement(tcg_t *tcg, int event , long x, long y)
 	return r;
 }
 
+static int tcg_handle_state_do_path(tcg_t *tcg, int event , long x, long y)
+{
+	int r;
+	
+	if ( tcg->path_aig_idx < 0 )
+	{
+		tcg->state = TCG_STATE_IDLE;
+	}
+	else
+	{
+		switch(event)
+		{
+			case TCG_EVENT_SHIFT_BUTTON_DOWN:
+			case TCG_EVENT_BUTTON_DOWN:
+				/* does not make sense here, button is already down */
+				r = 0;	
+				break;
+			case TCG_EVENT_MOUSE_MOVE:
+			case TCG_EVENT_BUTTON_UP:
+					/* store the reference position */
+					tcg->start_x = x;				
+					tcg->start_y = y;
+			
+				tcg_SetCatchAreaToPoint(tcg, x, y);
+				/* tcg_ApplyMove(tcg, x, y); leave it at the previous pos */
+
+				r = 1;	/* catch area change and moving state for selected elements */
+				break;
+			default:
+				r = 0;	/* nothing changed */
+				break;
+		}
+	}
+	return r;
+}
+
 /*
 	Event: one of
 		TCG_EVENT_BUTTON_DOWN
@@ -740,7 +785,11 @@ int tcg_SendEventWithGraphPosition(tcg_t *tcg, int event, long x, long y)
 			break;			
 		case TCG_STATE_DO_MOVEMENT:
 			r = tcg_handle_state_do_movement(tcg, event, x, y);
-			break;			
+			break;
+		case TCG_STATE_DO_PATH:
+			r = tcg_handle_state_do_path(tcg, event, x, y);
+			break;
+			
 		default:
 			tcg->state = TCG_STATE_IDLE;
 			r = 0;

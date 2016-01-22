@@ -315,20 +315,15 @@ void tcg_ApplyAigSegMove(tcg_t *tcg, int aig_idx, int seg_idx, long x, long y)
 int tcg_StartNewAigPath(tcg_t *tcg, int tig_src, int dir_src, int pos_src)
 {
 	int aig_idx;
-	aig_idx = tcg_AddAig(tcg, tig_src, dir_src, pos_src, -1, -1, -1);
+	printf("PATH START: dir=%d, pos=%d\n", dir_src, pos_src);
+	aig_idx = tcg_AddAig(tcg, tig_src, dir_src, pos_src, -1, (dir_src+1)&1, -1);
 	if ( aig_idx >= 0 )
 	{
-		aig_t *aig = tcg_GetAig(tcg, aig_idx);
-		
-		aig->dfv_cnt = 1;
-		if ( dir_src == 0 || dir_src == 2 )
-		{
-			aig->dfv_list[0].v = tcg_GetConnectPosX(tcg, tig_src, dir_src, pos_src);
-		}
-		else
-		{
-			aig->dfv_list[0].v = tcg_GetConnectPosY(tcg, tig_src, dir_src, pos_src);
-		}
+		/*
+			aig_t *aig = tcg_GetAig(tcg, aig_idx);
+			
+			aig->dfv_cnt = 0;
+		*/
 		return aig_idx;
 	}	
 	return -1;

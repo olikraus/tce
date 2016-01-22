@@ -102,56 +102,64 @@ long tcg_GetConnectDeltaPos(tcg_t *tcg, int idx, int dir, int pos)
 
 long tcg_GetConnectPosX(tcg_t *tcg, int idx, int dir, int pos)
 {
-	tig_t *eig;
+	tig_t *tig;
 	if ( idx < 0 )
-		return 0;	/* error */
-	eig = tcg_GetTig(tcg, idx);
-	if ( eig == NULL )
+	{
+		return tcg->start_x;	/* during path construction, the end pos is in start_x/start_y */
+	}
+	
+	tig = tcg_GetTig(tcg, idx);
+	if ( tig == NULL )
 		return 0;	/* error */
 
 	if ( dir == 0 )
 	{
-		return eig->area.x1;
+		return tig->area.x1;
 	}
 	else if ( dir == 1 )
 	{
-		return eig->area.x0 + tcg_GetConnectDeltaPos(tcg, idx, dir, pos);		
+		return tig->area.x0 + tcg_GetConnectDeltaPos(tcg, idx, dir, pos);		
 	}
 	else if ( dir == 2 )
 	{
-		return eig->area.x0;
+		return tig->area.x0;
 	}
 	else 
 	{
-		return eig->area.x0 + tcg_GetConnectDeltaPos(tcg, idx, dir, pos);
+		return tig->area.x0 + tcg_GetConnectDeltaPos(tcg, idx, dir, pos);
 	}
 	
 }
 
 long tcg_GetConnectPosY(tcg_t *tcg, int idx, int dir, int pos)
 {
-	tig_t *eig;
+	tig_t *tig;
 	if ( idx < 0 )
-		return 0;	/* error */
-	eig = tcg_GetTig(tcg, idx);
-	if ( eig == NULL )
+	{
+		return tcg->start_y;	/* during path construction, the end pos is in start_x/start_y */
+	}
+	
+	
+	
+	tig = tcg_GetTig(tcg, idx);
+	if ( tig == NULL )
 		return 0;	/* error */
 
 	if ( dir == 0 )
 	{
-		return eig->area.y0 + tcg_GetConnectDeltaPos(tcg, idx, dir, pos);
+		return tig->area.y0 + tcg_GetConnectDeltaPos(tcg, idx, dir, pos);
 	}
 	else if ( dir == 1 )
 	{
-		return eig->area.y1;
+		return tig->area.y1;
 	}
 	else if ( dir == 2 )
 	{
-		return eig->area.y0 + tcg_GetConnectDeltaPos(tcg, idx, dir, pos);
+		return tig->area.y0 + tcg_GetConnectDeltaPos(tcg, idx, dir, pos);
 	}
 	else 
 	{
-		return eig->area.y0;
+		return tig->area.y0;
 	}
 	
 }

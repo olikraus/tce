@@ -123,7 +123,7 @@ struct tcg_struct
 	rect_t catch_area;
 	
 	int state;
-	long start_x;	/* start position of the catch area or movement */
+	long start_x;	/* start position of the catch area, movement or end pos of the path */
 	long start_y;
 	
 	/* return values of the tcg_GetElementOverPosition function */
@@ -135,6 +135,9 @@ struct tcg_struct
 	int seg_pos;
 	int con_dir;
 	int con_pos;
+	
+	/* variables for the path construction */
+	int path_aig_idx;		/* the new path */
 };
 
 #define TCG_STATE_IDLE 0
@@ -144,6 +147,7 @@ struct tcg_struct
 #define TCG_STATE_SINGLE_MOVE 4
 #define TCG_STATE_SELECTON_MOVE 5
 #define TCG_STATE_DO_MOVEMENT 6
+#define TCG_STATE_DO_PATH 7
 
 #define TCG_EVENT_BUTTON_DOWN 0
 #define TCG_EVENT_SHIFT_BUTTON_DOWN 1

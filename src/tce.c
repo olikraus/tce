@@ -138,7 +138,7 @@ G_MODULE_EXPORT gboolean on_da_motion_notify_event(GtkWidget *w, GdkEvent *e, gp
 		gtk_widget_queue_draw (w);
 	}
 	
-	printf("on_da_motion_notify_event: %f %f %u state=%d\n", x, y, time, tcg->state);
+	//printf("on_da_motion_notify_event: %f %f %u state=%d\n", x, y, time, tcg->state);
 	
 
 	box(w,x,y);
@@ -248,7 +248,7 @@ G_MODULE_EXPORT void on_da_draw(GtkWidget *w, cairo_t *c, gpointer d)
 	width = gtk_widget_get_allocated_width (w);
 	height = gtk_widget_get_allocated_height (w);
 
-	printf("on_da_draw: %u %u\n", width, height);
+	//printf("on_da_draw: %u %u\n", width, height);
 	
 	tcg_RedrawAll(tcg, c);
 }
