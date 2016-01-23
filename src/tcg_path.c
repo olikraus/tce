@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <limits.h>
+#include <assert.h>
 #include <math.h>
 #include "tcg.h"
 
@@ -69,7 +70,7 @@ long tcg_GetAigPointX(tcg_t *tcg, int aig_idx, int pnt_idx)
 	}
 	else if ( pnt_idx == aig->dfv_cnt+1 )
 	{
-		if ( (aig->dir_dest & 1) != 0 )
+		if ( ( (aig->dir_src+pnt_idx ) & 1) != 0 )
 			x = tcg_GetConnectPosX(tcg, aig->tig_dest, aig->dir_dest, aig->pos_dest);
 		else
 			x = tcg_GetAigPointX(tcg, aig_idx, pnt_idx - 1);			
@@ -101,7 +102,7 @@ long tcg_GetAigPointY(tcg_t *tcg, int aig_idx, int pnt_idx)
 	}
 	else if ( pnt_idx == aig->dfv_cnt+1 )
 	{
-		if ( (aig->dir_dest & 1) == 0 )
+		if ( ( (aig->dir_src+pnt_idx ) & 1) == 0 )
 			y = tcg_GetConnectPosY(tcg, aig->tig_dest, aig->dir_dest, aig->pos_dest);
 		else
 			y = tcg_GetAigPointY(tcg, aig_idx, pnt_idx - 1);
@@ -159,59 +160,44 @@ int tcg_IsAigSegVertical(tcg_t *tcg, int aig_idx, int seg_idx)
 	return is_vertical;
 }
 
+
 void tcg_GetAigSegRect(tcg_t *tcg, int aig_idx, int seg_idx, rect_t *r)
 {
 	long a, b;
-	if ( tcg_IsAigSegVertical(tcg, aig_idx, seg_idx) == 0 )
-	{
-		/* horizontal */
-		r->y0 = tcg_GetAigSegStartPointY(tcg, aig_idx, seg_idx);
-		r->y1 = r->y0;
-		
-		r->y0 -= TCG_PATH_HALF_WIDTH;
-		r->y1 += TCG_PATH_HALF_WIDTH;
 
-		a = tcg_GetAigSegStartPointX(tcg, aig_idx, seg_idx);
-		b = tcg_GetAigSegEndPointX(tcg, aig_idx, seg_idx);
-		if ( a < b ) 
-		{
-			r->x0 = a;
-			r->x1 = b;
-		}
-		else
-		{
-			r->x0 = b;
-			r->x1 = a;
-		}
-		
-		r->x0 -= TCG_PATH_HALF_WIDTH;
-		r->x1 += TCG_PATH_HALF_WIDTH;
+	a = tcg_GetAigSegStartPointX(tcg, aig_idx, seg_idx);
+	b = tcg_GetAigSegEndPointX(tcg, aig_idx, seg_idx);
+	if ( a < b ) 
+	{
+		r->x0 = a;
+		r->x1 = b;
 	}
 	else
 	{
-		/* vertical */
-
-		r->x0 = tcg_GetAigSegStartPointX(tcg, aig_idx, seg_idx);
-		r->x1 = r->x0;
-		
-		r->x0 -= TCG_PATH_HALF_WIDTH;
-		r->x1 += TCG_PATH_HALF_WIDTH;
-
-		a = tcg_GetAigSegStartPointY(tcg, aig_idx, seg_idx);
-		b = tcg_GetAigSegEndPointY(tcg, aig_idx, seg_idx);
-		if ( a < b ) 
-		{
-			r->y0 = a;
-			r->y1 = b;
-		}
-		else
-		{
-			r->y0 = b;
-			r->y1 = a;
-		}
-		r->y0 -= TCG_PATH_HALF_WIDTH;
-		r->y1 += TCG_PATH_HALF_WIDTH;
+		r->x0 = b;
+		r->x1 = a;
 	}
+	
+	r->x0 -= TCG_PATH_HALF_WIDTH;
+	r->x1 += TCG_PATH_HALF_WIDTH;
+
+	a = tcg_GetAigSegStartPointY(tcg, aig_idx, seg_idx);
+	b = tcg_GetAigSegEndPointY(tcg, aig_idx, seg_idx);
+	if ( a < b ) 
+	{
+		r->y0 = a;
+		r->y1 = b;
+	}
+	else
+	{
+		r->y0 = b;
+		r->y1 = a;
+	}
+
+	r->y0 -= TCG_PATH_HALF_WIDTH;
+	r->y1 += TCG_PATH_HALF_WIDTH;
+
+	
 }
 
 
@@ -408,6 +394,14 @@ void tcg_ShowAigPoints(tcg_t *tcg, int aig_idx)
 		printf("%ld/", r.x1 );
 		printf("%ld  ", r.y1 );
 	  
+		if ( i >= 1 && i < cnt-1 )
+		{
+			aig_t *aig;
+			aig = tcg_GetAig(tcg, aig_idx);
+			printf("is_vertical: %d  ", aig->dfv_list[i-1].is_vertical );
+			
+		}
+		
  		printf("\n");
 	}
 	

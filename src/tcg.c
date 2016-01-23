@@ -114,15 +114,15 @@ tcg_t *tcg_Open(void)
 				tcg->aig_list = ps_Open();
 				if ( tcg->aig_list != NULL )
 				{
-					tcg->seg_list = ps_Open();
-					if ( tcg->seg_list != NULL )
+					//tcg->seg_list = ps_Open();
+					//if ( tcg->seg_list != NULL )
 					{
 						tgc_CalculateDimension(tcg);
 						invalid_rectangle(&(tcg->catch_area));
 						tcg->state = TCG_STATE_IDLE;
 						return tcg;
 					}
-					ps_Close(tcg->aig_list);
+					//ps_Close(tcg->aig_list);
 				}
 				ps_Close(tcg->tig_list);
 			}
@@ -163,6 +163,7 @@ static void tcg_ClearAigList(tcg_t *tcg)
 	ps_Clear(tcg->tig_list);
 }
 
+/*	
 static void tcg_ClearSegList(tcg_t *tcg)
 {
 	int i;
@@ -172,20 +173,21 @@ static void tcg_ClearSegList(tcg_t *tcg)
 	while( tcg_WhileSeg(tcg, &i) )
 	{
 		seg = tcg_GetSeg(tcg, i);
-		seg_Close(seg);
+		//seg_Close(seg);
 		tcg_SetSeg(tcg, i, NULL);
 	}
 	ps_Clear(tcg->seg_list);
 }
+*/
 
 void tcg_Close(tcg_t *tcg)
 {
 	tcg_ClearTigList(tcg);
 	tcg_ClearAigList(tcg);
-	tcg_ClearSegList(tcg);
+	//tcg_ClearSegList(tcg);
 	ps_Close(tcg->aig_list);
 	ps_Close(tcg->tig_list);
-	ps_Close(tcg->seg_list);
+	//ps_Close(tcg->seg_list);
 	tcgv_Close(tcg->tcgv);
 	free(tcg);
 }

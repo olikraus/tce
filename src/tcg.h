@@ -169,10 +169,12 @@ struct tcg_struct
 #define tcg_GetAig(tcg, idx) ((aig_t *)ps_Get((tcg)->aig_list, (idx)))
 #define tcg_SetAig(tcg, idx, aig) (ps_Set((tcg)->aig_list, (idx), (void *)(aig)))
 
+/*
 #define tcg_GetSegCnt(tcg) ps_Cnt((tcg)->seg_list)
 #define tcg_WhileSeg(tcg, idx) ps_WhileLoop((tcg)->seg_list, (idx))
 #define tcg_GetSeg(tcg, idx) ((seg_t *)ps_Get((tcg)->seg_list, (idx)))
 #define tcg_SetSeg(tcg, idx, seg) (ps_Set((tcg)->seg_list, (idx), (void *)(seg)))
+*/
 
 /*========================================*/
 /* tcg_util.c */
@@ -233,12 +235,13 @@ void tcg_DeselectAig(tcg_t *tcg, int aig_idx);
 
 /*========================================*/
 /* tcg_seg.c (Segment of the path of an artefact */
+/*
 seg_t *seg_Open(void);
 void seg_Close(seg_t *seg);
 
 int tcg_AddSeg(tcg_t *tcg, int aig_idx, int seg_seq_no);
 void tcg_DeleteSegPathByAig(tcg_t *tcg, int aig_idx);
-
+*/
 
 
 /*========================================*/
