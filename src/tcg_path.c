@@ -382,6 +382,7 @@ long tcg_GetAigPointY(tcg_t *tcg, int aig_idx, int pnt_idx)
 #endif
 void tcg_ShowAigPoints(tcg_t *tcg, int aig_idx)
 {
+	rect_t r;
 	int i, cnt;
 	cnt = tcg_GetAigPointCnt(tcg, aig_idx);
 	for( i = 0; i < cnt; i++ )
@@ -400,6 +401,12 @@ void tcg_ShowAigPoints(tcg_t *tcg, int aig_idx)
 		printf("%ld .. ", tcg_GetAigSegStartPointY(tcg, aig_idx, i) );
 		printf("%ld/", tcg_GetAigSegEndPointX(tcg, aig_idx, i) );
 		printf("%ld  ", tcg_GetAigSegEndPointY(tcg, aig_idx, i) );
+
+		tcg_GetAigSegRect(tcg, aig_idx, i, &r);
+		printf("%ld/", r.x0 );
+		printf("%ld .. ", r.y0 );
+		printf("%ld/", r.x1 );
+		printf("%ld  ", r.y1 );
 	  
  		printf("\n");
 	}
