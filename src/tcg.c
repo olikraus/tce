@@ -252,7 +252,7 @@ void tcg_AddCatchedToSelection(tcg_t *tcg)
 		tcg->seg_pos
 	return 0 if there is no element (tig or segment) at x/y.
 */
-int tcg_GetElementOverPosition(tcg_t *tcg, long x, long y)
+int tcg_GetElementOverPosition(tcg_t *tcg, long x, long y, int is_all)
 {
 	tig_t *tig;
 	rect_t r;
@@ -281,15 +281,27 @@ int tcg_GetElementOverPosition(tcg_t *tcg, long x, long y)
 	i = -1;
 	while( tcg_WhileAig(tcg, &i) )
 	{
-		cnt = tcg_GetAigSegCnt(tcg, i)-1;
-		for ( j = 1; j < cnt; j++ )
+		cnt = tcg_GetAigSegCnt(tcg, i);
+		for ( j = 0; j < cnt; j++ )
 		{
 			tcg_GetAigSegRect(tcg, i, j, &r);
 			if ( (r.x0 <= x && x <= r.x1) && (r.y0 <= y && y <= r.y1) )
 			{
-				tcg->aig_idx = i;
-				tcg->seg_pos = j;
-				return 1;
+				if ( is_all != 0 )
+				{
+					tcg->aig_idx = i;
+					tcg->seg_pos = j;
+					return 1;
+				}
+				else
+				{
+					if ( j > 0 && j+1 < cnt )
+					{
+						tcg->aig_idx = i;
+						tcg->seg_pos = j;
+						return 1;
+					}
+				}
 			}
 		}
 	}
@@ -438,7 +450,7 @@ static int tcg_handle_state_idle(tcg_t *tcg, int event , long x, long y)
 	switch(event)
 	{
 		case TCG_EVENT_BUTTON_DOWN:
-			if ( tcg_GetElementOverPosition(tcg, x, y) )
+			if ( tcg_GetElementOverPosition(tcg, x, y, 0) )
 			{
 				if ( tcg->con_dir >= 0 && tcg->con_pos >= 0 )
 				{
@@ -487,7 +499,7 @@ static int tcg_handle_state_idle(tcg_t *tcg, int event , long x, long y)
 			}
 			break;
 		case TCG_EVENT_SHIFT_BUTTON_DOWN:
-			if ( tcg_GetElementOverPosition(tcg, x, y) )
+			if ( tcg_GetElementOverPosition(tcg, x, y, 0) )
 			{
 				/* shift mouse button press: single element (de)selection */
 				/* state does not change here, change is applied directly */
@@ -517,7 +529,7 @@ static int tcg_handle_state_idle(tcg_t *tcg, int event , long x, long y)
 			r = 1;
 			break;			
 		case TCG_EVENT_INSERT_SEGMENT:
-			if ( tcg_GetElementOverPosition(tcg, x, y) )
+			if ( tcg_GetElementOverPosition(tcg, x, y, 1) )
 			{
 				if ( tcg->aig_idx >= 0 && tcg->seg_pos >= 0 )
 				{
@@ -527,7 +539,7 @@ static int tcg_handle_state_idle(tcg_t *tcg, int event , long x, long y)
 			}
 			break;
 		case TCG_EVENT_DELETE_PATH:
-			if ( tcg_GetElementOverPosition(tcg, x, y) )
+			if ( tcg_GetElementOverPosition(tcg, x, y, 1) )
 			{
 				if ( tcg->aig_idx >= 0  )
 				{
@@ -645,7 +657,7 @@ static int tcg_handle_state_single_move(tcg_t *tcg, int event , long x, long y)
 			tcg_SetCatchAreaToPoint(tcg, x, y);
 		
 			//idx = tcg_GetElementOverPosition(tcg, tcg->start_x, tcg->start_y);
-			if ( tcg_GetElementOverPosition(tcg, tcg->start_x, tcg->start_y) == 0 )
+			if ( tcg_GetElementOverPosition(tcg, tcg->start_x, tcg->start_y, 0) == 0 )
 			{
 				/* something is wrong, this shold not happen */
 				tcg->state = TCG_STATE_IDLE;
@@ -751,7 +763,7 @@ static int tcg_handle_state_do_path(tcg_t *tcg, int event , long x, long y)
 				tcg->start_y = y;
 				tcg_SetCatchAreaToPoint(tcg, x, y);
 
-				if ( tcg_GetElementOverPosition(tcg, x, y) )
+				if ( tcg_GetElementOverPosition(tcg, x, y, 0) )
 				{
 					if ( tcg->con_pos >= 0 )
 					{

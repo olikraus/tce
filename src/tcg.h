@@ -131,8 +131,10 @@ struct tcg_struct
 	/* The values will be set to -1 if not used */
 	/* the following three values are refered as "element" which is either tig or aig segment */
 	int tig_idx;
-	int aig_idx;
-	int seg_pos;
+	
+	int aig_idx;	
+	int seg_pos;	
+
 	int con_dir;
 	int con_pos;
 	
