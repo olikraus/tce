@@ -725,15 +725,29 @@ static int tcg_handle_state_do_path(tcg_t *tcg, int event , long x, long y)
 		{
 			case TCG_EVENT_SHIFT_BUTTON_DOWN:
 			case TCG_EVENT_BUTTON_DOWN:
-			  
-				tcg_AddSegmentToNewAigPath(tcg, tcg->path_aig_idx, x, y);
-			
 				tcg->start_x = x;
 				tcg->start_y = y;
-			
-				tcg_ShowAigPoints(tcg, tcg->path_aig_idx);
+				tcg_SetCatchAreaToPoint(tcg, x, y);
 
-				r = 0;	
+				if ( tcg_GetElementOverPosition(tcg, x, y) )
+				{
+					if ( tcg->con_pos >= 0 )
+					{
+						tcg_FinishNewAigPath(tcg, tcg->path_aig_idx, tcg->tig_idx, tcg->con_dir, tcg->con_pos);
+						tcg->state = TCG_STATE_IDLE;
+					}
+					else
+					{
+						tcg_AddSegToNewAigPath(tcg, tcg->path_aig_idx, x, y);
+					}
+					
+				}
+				else
+				{
+					tcg_AddSegToNewAigPath(tcg, tcg->path_aig_idx, x, y);
+				}
+
+				r = 1;	
 				break;
 			case TCG_EVENT_MOUSE_MOVE:
 			case TCG_EVENT_BUTTON_UP:

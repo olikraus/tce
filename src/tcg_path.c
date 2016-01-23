@@ -322,27 +322,44 @@ int tcg_StartNewAigPath(tcg_t *tcg, int tig_src, int dir_src, int pos_src)
   intended to be used together with tcg_StartNewAigPath:
   adds a new segment to the path
 */
-void tcg_AddSegmentToNewAigPath(tcg_t *tcg, int aig_idx, long x, long y)
+void tcg_AddSegToNewAigPath(tcg_t *tcg, int aig_idx, long x, long y)
+{
+	aig_t *aig;
+	aig = tcg_GetAig(tcg, aig_idx);
+
+	if ( aig->dfv_cnt >= AIG_DFV_MAX )
+		return;
+
+	aig->dfv_list[aig->dfv_cnt].is_vertical = (aig->dir_src+aig->dfv_cnt+1)&1;
+	if ( aig->dfv_list[aig->dfv_cnt].is_vertical != 0 )
+	{
+		aig->dfv_list[aig->dfv_cnt].v = x;
+	}
+	else
+	{
+		aig->dfv_list[aig->dfv_cnt].v = y;
+	}
+	aig->dfv_list[aig->dfv_cnt].is_selected = 0;
+	aig->dfv_cnt++;
+}
+
+void tcg_FinishNewAigPath(tcg_t *tcg, int aig_idx, int tig_dest, int dir_dest, int pos_dest)
 {
 	aig_t *aig;
 	aig = tcg_GetAig(tcg, aig_idx);
 	
-  if ( aig->dfv_cnt >= AIG_DFV_MAX )
-    return;
-  
-  aig->dfv_list[aig->dfv_cnt].is_vertical = (aig->dir_src+aig->dfv_cnt+1)&1;
-  if ( aig->dfv_list[aig->dfv_cnt].is_vertical != 0 )
-  {
-    aig->dfv_list[aig->dfv_cnt].v = x;
-  }
-  else
-  {
-    aig->dfv_list[aig->dfv_cnt].v = y;
-  }
-  aig->dfv_list[aig->dfv_cnt].is_selected = 0;
-  aig->dfv_cnt++;
+	aig->tig_dest = tig_dest;
+	aig->dir_dest = dir_dest;
+	aig->pos_dest = pos_dest;
+	
+	if ( tcg_IsAigSegVertical(tcg, aig_idx, aig->dfv_cnt+1) != (dir_dest&1) )
+	{
+		tcg_AddSegToNewAigPath(tcg, 
+			aig_idx, 
+			tcg_GetConnectPosX(tcg, aig_idx, dir_dest, pos_dest), 
+			tcg_GetConnectPosY(tcg, aig_idx, dir_dest, pos_dest));
+	}
 }
-
 
 
 #ifdef OBSOLETE
