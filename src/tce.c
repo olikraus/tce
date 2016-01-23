@@ -114,12 +114,19 @@ void tcg_UpdateZoomValue(tcg_t *tcg)
 /*==============================================================*/
 /* signal handler */
 
+G_MODULE_EXPORT void on_da_popup_delete_path_activate (GtkMenuItem *menuitem, gpointer d)
+{
+	tcg_t *tcg = (tcg_t *)d;
+	tcg_SendEventWithViewPosition(tcg, TCG_EVENT_DELETE_PATH, da_popup_menu_x, da_popup_menu_y);
+	puts("on_da_popup_delete_path_activate");
+	
+	gtk_widget_queue_draw (GTK_WIDGET(da));	
+}
 
 G_MODULE_EXPORT void on_da_popup_add_segment_activate (GtkMenuItem *menuitem, gpointer d)
 {
 	tcg_t *tcg = (tcg_t *)d;
 	tcg_SendEventWithViewPosition(tcg, TCG_EVENT_INSERT_SEGMENT, da_popup_menu_x, da_popup_menu_y);
-	puts("on_da_popup_add_segment_activate");
 	
 	gtk_widget_queue_draw (GTK_WIDGET(da));	
 }

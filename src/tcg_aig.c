@@ -130,3 +130,13 @@ void tcg_DeselectAig(tcg_t *tcg, int aig_idx)
 	}
 }
 
+void tcg_DeleteAig(tcg_t *tcg, int aig_idx)
+{
+	aig_t *aig;
+	int i, cnt;
+	aig = tcg_GetAig(tcg, aig_idx);
+	aig_Close(aig);	
+	ps_Del(tcg->aig_list, aig_idx);
+}
+
+

@@ -526,6 +526,18 @@ static int tcg_handle_state_idle(tcg_t *tcg, int event , long x, long y)
 				}
 			}
 			break;
+		case TCG_EVENT_DELETE_PATH:
+			if ( tcg_GetElementOverPosition(tcg, x, y) )
+			{
+				if ( tcg->aig_idx >= 0  )
+				{
+					tcg_DeleteAig(tcg, tcg->aig_idx);
+					r = 1;
+				}
+			}
+			break;
+			
+			break;
 		case TCG_EVENT_BUTTON_UP:
 		default:
 			r = 0;	/* nothing changed */

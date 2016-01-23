@@ -362,41 +362,6 @@ void tcg_FinishNewAigPath(tcg_t *tcg, int aig_idx, int tig_dest, int dir_dest, i
 	}
 }
 
-/*
-static long tcg_GetSegValue(tcg_t *tcg, int aig_idx, int seg_idx)
-{
-	aig_t *aig;
-	long v;
-	aig = tcg_GetAig(tcg, aig_idx);
-	if ( seg_idx == 0 )
-	{
-		if ( (aig->dir_src & 1) == 0 )
-		{
-			v = tcg_GetConnectPosY(tcg, aig->tig_src, aig->dir_src, aig->pos_src);
-		}
-		else
-		{
-			v = tcg_GetConnectPosX(tcg, aig->tig_src, aig->dir_src, aig->pos_src);
-		}
-	}
-	else if ( seg_idx < aig->dfv_cnt )
-	{
-		v = dfv_list[seg_idx-1];
-	}
-	else
-	{
-		if ( (aig->dir_dest & 1) == 0 )
-		{
-			v = tcg_GetConnectPosY(tcg, aig->tig_dest, aig->dir_dest, aig->pos_dest);
-		}
-		else
-		{
-			v = tcg_GetConnectPosX(tcg, aig->tig_dest, aig->dir_dest, aig->pos_dest);
-		}
-	}
-	return v;
-}
-*/
 
 /*
 	replace the segment by three segments
@@ -445,6 +410,7 @@ void tcg_InsertSegIntoAigPath(tcg_t *tcg, int aig_idx, int seg_idx)
 		
 	}
 }
+
 
 #ifdef OBSOLETE
 long tcg_GetAigPointX(tcg_t *tcg, int aig_idx, int pnt_idx)

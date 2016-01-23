@@ -154,6 +154,7 @@ struct tcg_struct
 #define TCG_EVENT_MOUSE_MOVE 2
 #define TCG_EVENT_BUTTON_UP 3
 #define TCG_EVENT_INSERT_SEGMENT 4
+#define TCG_EVENT_DELETE_PATH 5
 
 
 #define tcg_IsMovement(tcg) ((tcg)->state == TCG_STATE_DO_MOVEMENT)
@@ -233,6 +234,7 @@ void aig_Close(aig_t *aig);
 int tcg_AddPlainAig(tcg_t *tcg);
 int tcg_AddAig(tcg_t *tcg, int tig_src, int dir_src, int pos_src, int tig_dest, int dir_dest, int pos_dest);
 void tcg_DeselectAig(tcg_t *tcg, int aig_idx);
+void tcg_DeleteAig(tcg_t *tcg, int aig_idx);
 
 /*========================================*/
 /* tcg_seg.c (Segment of the path of an artefact */
