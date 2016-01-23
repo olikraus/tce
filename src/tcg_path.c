@@ -358,9 +358,93 @@ void tcg_FinishNewAigPath(tcg_t *tcg, int aig_idx, int tig_dest, int dir_dest, i
 			aig_idx, 
 			tcg_GetConnectPosX(tcg, aig_idx, dir_dest, pos_dest), 
 			tcg_GetConnectPosY(tcg, aig_idx, dir_dest, pos_dest));
+		tcg_ShowAigPoints(tcg, aig_idx);
 	}
 }
 
+/*
+static long tcg_GetSegValue(tcg_t *tcg, int aig_idx, int seg_idx)
+{
+	aig_t *aig;
+	long v;
+	aig = tcg_GetAig(tcg, aig_idx);
+	if ( seg_idx == 0 )
+	{
+		if ( (aig->dir_src & 1) == 0 )
+		{
+			v = tcg_GetConnectPosY(tcg, aig->tig_src, aig->dir_src, aig->pos_src);
+		}
+		else
+		{
+			v = tcg_GetConnectPosX(tcg, aig->tig_src, aig->dir_src, aig->pos_src);
+		}
+	}
+	else if ( seg_idx < aig->dfv_cnt )
+	{
+		v = dfv_list[seg_idx-1];
+	}
+	else
+	{
+		if ( (aig->dir_dest & 1) == 0 )
+		{
+			v = tcg_GetConnectPosY(tcg, aig->tig_dest, aig->dir_dest, aig->pos_dest);
+		}
+		else
+		{
+			v = tcg_GetConnectPosX(tcg, aig->tig_dest, aig->dir_dest, aig->pos_dest);
+		}
+	}
+	return v;
+}
+*/
+
+/*
+	replace the segment by three segments
+*/
+void tcg_InsertSegIntoAigPath(tcg_t *tcg, int aig_idx, int seg_idx)
+{
+	aig_t *aig;
+	int i;
+	long v, v0, v1;
+	int is_vertical;
+	aig = tcg_GetAig(tcg, aig_idx);
+	if ( aig->dfv_cnt+2 <= AIG_DFV_MAX )
+	{
+		is_vertical = tcg_IsAigSegVertical(tcg, aig_idx, seg_idx);
+		if ( is_vertical == 0 )
+		{
+			v = tcg_GetAigSegStartPointY(tcg, aig_idx, seg_idx);
+			v0 = tcg_GetAigSegStartPointX(tcg, aig_idx, seg_idx);
+			v1 = tcg_GetAigSegEndPointX(tcg, aig_idx, seg_idx);
+			
+		}
+		else
+		{
+			v = tcg_GetAigSegStartPointX(tcg, aig_idx, seg_idx);
+			v0 = tcg_GetAigSegStartPointY(tcg, aig_idx, seg_idx);
+			v1 = tcg_GetAigSegEndPointY(tcg, aig_idx, seg_idx);
+		}
+
+		/*
+		v1 = tcg_GetSegValue(tcg, aig_idx, seg_idx);
+		v0 = tcg_GetSegValue(tcg, aig_idx, seg_idx+1);
+		*/
+		i = aig->dfv_cnt+1;
+		while( i >= seg_idx+2 )
+		{
+			aig->dfv_list[i] = aig->dfv_list[i-2];
+			i--;
+		}
+		
+		aig->dfv_list[seg_idx].v = (v0+v1)/2;
+		aig->dfv_list[seg_idx].is_vertical = (is_vertical+1)&1;
+		aig->dfv_list[seg_idx+1].v = v;
+		aig->dfv_list[seg_idx+1].is_vertical = (is_vertical)&1;
+		
+		aig->dfv_cnt += 2;
+		
+	}
+}
 
 #ifdef OBSOLETE
 long tcg_GetAigPointX(tcg_t *tcg, int aig_idx, int pnt_idx)

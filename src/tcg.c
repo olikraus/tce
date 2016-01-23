@@ -516,6 +516,16 @@ static int tcg_handle_state_idle(tcg_t *tcg, int event , long x, long y)
 			tcg_SetCatchAreaToPoint(tcg, x, y);
 			r = 1;
 			break;			
+		case TCG_EVENT_INSERT_SEGMENT:
+			if ( tcg_GetElementOverPosition(tcg, x, y) )
+			{
+				if ( tcg->aig_idx >= 0 && tcg->seg_pos >= 0 )
+				{
+					tcg_InsertSegIntoAigPath(tcg, tcg->aig_idx, tcg->seg_pos);
+					r = 1;
+				}
+			}
+			break;
 		case TCG_EVENT_BUTTON_UP:
 		default:
 			r = 0;	/* nothing changed */

@@ -153,6 +153,7 @@ struct tcg_struct
 #define TCG_EVENT_SHIFT_BUTTON_DOWN 1
 #define TCG_EVENT_MOUSE_MOVE 2
 #define TCG_EVENT_BUTTON_UP 3
+#define TCG_EVENT_INSERT_SEGMENT 4
 
 
 #define tcg_IsMovement(tcg) ((tcg)->state == TCG_STATE_DO_MOVEMENT)
@@ -269,6 +270,7 @@ void tcg_ApplyAigSegMove(tcg_t *tcg, int aig_idx, int seg_idx, long x, long y);
 int tcg_StartNewAigPath(tcg_t *tcg, int tig_src, int dir_src, int pos_src);	
 void tcg_AddSegToNewAigPath(tcg_t *tcg, int aig_idx, long x, long y);
 void tcg_FinishNewAigPath(tcg_t *tcg, int aig_idx, int tig_dest, int dir_dest, int pos_dest);
+void tcg_InsertSegIntoAigPath(tcg_t *tcg, int aig_idx, int seg_idx);
 
 void tcg_ShowAigPoints(tcg_t *tcg, int aig_idx);
 void tcg_CalculateAigPath(tcg_t *tcg, int idx);
