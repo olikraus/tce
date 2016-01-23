@@ -311,7 +311,10 @@ void tcg_ApplyAigSegMove(tcg_t *tcg, int aig_idx, int seg_idx, long x, long y)
 	aig->dfv_list[seg_idx].v = v;		
 }
 
-/* return aig_idx */
+/*
+  start a new aig, uses -1 as end point (mouse pos) 
+  return aig_idx 
+*/
 int tcg_StartNewAigPath(tcg_t *tcg, int tig_src, int dir_src, int pos_src)
 {
 	int aig_idx;
@@ -327,6 +330,31 @@ int tcg_StartNewAigPath(tcg_t *tcg, int tig_src, int dir_src, int pos_src)
 		return aig_idx;
 	}	
 	return -1;
+}
+
+/*
+  intended to be used together with tcg_StartNewAigPath:
+  adds a new segment to the path
+*/
+void tcg_AddSegmentToNewAigPath(tcg_t *tcg, int aig_idx, long x, long y)
+{
+	aig_t *aig;
+	aig = tcg_GetAig(tcg, aig_idx);
+	
+  if ( aig->dfv_cnt >= AIG_DFV_MAX )
+    return;
+  
+  aig->dfv_list[aig->dfv_cnt].is_vertical = (aig->dir_src+aig->dfv_cnt+1)&1;
+  if ( aig->dfv_list[aig->dfv_cnt].is_vertical != 0 )
+  {
+    aig->dfv_list[aig->dfv_cnt].v = x;
+  }
+  else
+  {
+    aig->dfv_list[aig->dfv_cnt].v = y;
+  }
+  aig->dfv_list[aig->dfv_cnt].is_selected = 0;
+  aig->dfv_cnt++;
 }
 
 
@@ -362,6 +390,18 @@ void tcg_ShowAigPoints(tcg_t *tcg, int aig_idx)
 		printf("x: %ld  ", tcg_GetAigPointX(tcg, aig_idx, i) );
 		printf("y: %ld  ", tcg_GetAigPointY(tcg, aig_idx, i) );
 		printf("\n");
+	}
+	cnt = tcg_GetAigSegCnt(tcg, aig_idx);
+	for( i = 0; i < cnt; i++ )
+	{
+		printf("%d/%d  ", i, cnt-1 );
+		printf("is_vertical: %d  ", tcg_IsAigSegVertical(tcg, aig_idx, i) );
+		printf("%ld/", tcg_GetAigSegStartPointX(tcg, aig_idx, i) );
+		printf("%ld .. ", tcg_GetAigSegStartPointY(tcg, aig_idx, i) );
+		printf("%ld/", tcg_GetAigSegEndPointX(tcg, aig_idx, i) );
+		printf("%ld  ", tcg_GetAigSegEndPointY(tcg, aig_idx, i) );
+	  
+ 		printf("\n");
 	}
 	
 }

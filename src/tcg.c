@@ -440,8 +440,7 @@ static int tcg_handle_state_idle(tcg_t *tcg, int event , long x, long y)
 			{
 				if ( tcg->con_dir >= 0 && tcg->con_pos >= 0 )
 				{
-					r = 1;	/* catch area change */
-					puts("Connector pressed");
+					tcg_DeselectAll(tcg);
 					/* store the reference position */
 					tcg->start_x = x;				
 					tcg->start_y = y;
@@ -450,7 +449,7 @@ static int tcg_handle_state_idle(tcg_t *tcg, int event , long x, long y)
 					
 					/* continue with the state */
 					tcg->state = TCG_STATE_DO_PATH;
-					puts("TCG_STATE_DO_PATH");
+					r = 1;	
 				}
 				else
 				{
@@ -724,17 +723,25 @@ static int tcg_handle_state_do_path(tcg_t *tcg, int event , long x, long y)
 		{
 			case TCG_EVENT_SHIFT_BUTTON_DOWN:
 			case TCG_EVENT_BUTTON_DOWN:
-				/* does not make sense here, button is already down */
+			  
+				tcg_AddSegmentToNewAigPath(tcg, tcg->path_aig_idx, x, y);
+			
+				tcg->start_x = x;
+				tcg->start_y = y;
+			
+				tcg_ShowAigPoints(tcg, tcg->path_aig_idx);
+
 				r = 0;	
 				break;
 			case TCG_EVENT_MOUSE_MOVE:
 			case TCG_EVENT_BUTTON_UP:
 					/* store the reference position */
-					tcg->start_x = x;				
-					tcg->start_y = y;
+				tcg->start_x = x;				
+				tcg->start_y = y;
 			
 				tcg_SetCatchAreaToPoint(tcg, x, y);
 				/* tcg_ApplyMove(tcg, x, y); leave it at the previous pos */
+				tcg_ShowAigPoints(tcg, tcg->path_aig_idx);
 
 				r = 1;	/* catch area change and moving state for selected elements */
 				break;

@@ -76,8 +76,8 @@ typedef struct dfv_struct dfv_t;
 
 /* artefact in graph */
 
-#define AIG_POINT_MAX 5
-#define AIG_DFV_MAX 3
+#define AIG_DFV_MAX 5
+#define AIG_POINT_MAX (AIG_DFV_MAX+2)
 struct aig_struct
 {
 	int tig_src;	/* element index (tig_list) source tool*/
@@ -263,7 +263,8 @@ void tcg_DeselectAigSeg(tcg_t *tcg, int aig_idx, int seg_idx);
 int tcg_IsAigSegSelected(tcg_t *tcg, int aig_idx, int seg_idx);
 void tcg_StartAigSegMove(tcg_t *tcg, int aig_idx, int seg_idx);
 void tcg_ApplyAigSegMove(tcg_t *tcg, int aig_idx, int seg_idx, long x, long y); 
-int tcg_StartNewAigPath(tcg_t *tcg, int tig_src, int dir_src, int pos_src);	/* not yet used */
+int tcg_StartNewAigPath(tcg_t *tcg, int tig_src, int dir_src, int pos_src);	
+void tcg_AddSegmentToNewAigPath(tcg_t *tcg, int aig_idx, long x, long y);
 
 void tcg_ShowAigPoints(tcg_t *tcg, int aig_idx);
 void tcg_CalculateAigPath(tcg_t *tcg, int idx);
