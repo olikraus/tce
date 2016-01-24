@@ -372,7 +372,9 @@ int main (int argc, char *argv[])
 
 
 	/* https://developer.gnome.org/gtk3/stable/GtkBuilder.html#gtk-builder-new-from-file */
-	builder = gtk_builder_new_from_file ("tce.glade");
+	//builder = gtk_builder_new_from_file ("tce.glade");
+	builder = gtk_builder_new();
+	gtk_builder_add_from_file(builder, "tce.glade", NULL);
 	
 	window = GTK_WIDGET (gtk_builder_get_object (builder, "main_window"));
 	da_h_scrollbar = GTK_SCROLLBAR(gtk_builder_get_object (builder, "da_h_scrollbar"));
