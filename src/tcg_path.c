@@ -375,6 +375,7 @@ void tcg_InsertSegIntoAigPath(tcg_t *tcg, int aig_idx, int seg_idx)
 	aig = tcg_GetAig(tcg, aig_idx);
 	if ( aig->dfv_cnt+2 <= AIG_DFV_MAX )
 	{
+		tcg_ShowAigPoints(tcg, aig_idx);
 		is_vertical = tcg_IsAigSegVertical(tcg, aig_idx, seg_idx);
 		if ( is_vertical == 0 )
 		{
@@ -401,13 +402,24 @@ void tcg_InsertSegIntoAigPath(tcg_t *tcg, int aig_idx, int seg_idx)
 			i--;
 		}
 		
-		aig->dfv_list[seg_idx].v = (v0+v1)/2;
-		aig->dfv_list[seg_idx].is_vertical = (is_vertical+1)&1;
-		aig->dfv_list[seg_idx+1].v = v;
-		aig->dfv_list[seg_idx+1].is_vertical = (is_vertical)&1;
+		if ( seg_idx <= aig->dfv_cnt )
+		{
+			aig->dfv_list[seg_idx].v = (v0+v1)/2;
+			aig->dfv_list[seg_idx].is_vertical = (is_vertical+1)&1;
+			aig->dfv_list[seg_idx+1].v = v;
+			aig->dfv_list[seg_idx+1].is_vertical = (is_vertical)&1;
+		}
+		else
+		{
+			aig->dfv_list[seg_idx].v = (v0+v1)/2;
+			aig->dfv_list[seg_idx].is_vertical = (is_vertical+1)&1;
+			aig->dfv_list[seg_idx-1].v = v;
+			aig->dfv_list[seg_idx-1].is_vertical = (is_vertical)&1;
+		}
 		
 		aig->dfv_cnt += 2;
 		
+		tcg_ShowAigPoints(tcg, aig_idx);
 	}
 }
 
