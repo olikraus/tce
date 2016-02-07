@@ -35,6 +35,7 @@ GtkLabel *zoom_value;
 GtkScrollbar *da_h_scrollbar;
 GtkDrawingArea *da;
 GtkAboutDialog *aboutdialog;
+GtkDialog *tool_dialog;
 GtkMenu *da_popup;
 double da_popup_menu_x;
 double da_popup_menu_y;
@@ -114,6 +115,7 @@ void tcg_UpdateZoomValue(tcg_t *tcg)
 /*==============================================================*/
 /* signal handler */
 
+
 G_MODULE_EXPORT void on_da_popup_delete_path_activate (GtkMenuItem *menuitem, gpointer d)
 {
 	tcg_t *tcg = (tcg_t *)d;
@@ -128,7 +130,32 @@ G_MODULE_EXPORT void on_da_popup_add_segment_activate (GtkMenuItem *menuitem, gp
 	tcg_t *tcg = (tcg_t *)d;
 	tcg_SendEventWithViewPosition(tcg, TCG_EVENT_INSERT_SEGMENT, da_popup_menu_x, da_popup_menu_y);
 	
-	gtk_widget_queue_draw (GTK_WIDGET(da));	
+	gtk_widget_queue_draw (GTK_WIDGET(da));
+}
+
+G_MODULE_EXPORT void on_event_tool_dialog_cancel(GtkMenuItem *menuitem, gpointer d)
+{
+	gtk_dialog_response (tool_dialog, 0);
+	gtk_widget_hide(GTK_WIDGET(tool_dialog));
+	puts("on_event_tool_dialog_cancel");
+}
+
+G_MODULE_EXPORT void on_event_tool_dialog_ok(GtkMenuItem *menuitem, gpointer d)
+{
+	gtk_dialog_response (tool_dialog, 1);	
+	gtk_widget_hide(GTK_WIDGET(tool_dialog));
+	puts("on_event_tool_dialog_ok");
+}
+
+G_MODULE_EXPORT void on_da_popup_edit_tool_activate (GtkMenuItem *menuitem, gpointer d)
+{
+	int response;
+	tcg_t *tcg = (tcg_t *)d;
+	puts("on_da_popup_edit_tool_activate");
+	gtk_widget_show_all (GTK_WINDOW(tool_dialog));                
+
+	response = gtk_dialog_run(tool_dialog);
+	gtk_widget_queue_draw (GTK_WIDGET(da));
 }
 
 G_MODULE_EXPORT void on_da_popup_new_tool_activate (GtkMenuItem *menuitem, gpointer d)
@@ -372,9 +399,9 @@ int main (int argc, char *argv[])
 
 
 	/* https://developer.gnome.org/gtk3/stable/GtkBuilder.html#gtk-builder-new-from-file */
-	//builder = gtk_builder_new_from_file ("tce.glade");
-	builder = gtk_builder_new();
-	gtk_builder_add_from_file(builder, "tce.glade", NULL);
+	builder = gtk_builder_new_from_file ("tce.glade");
+	//builder = gtk_builder_new();
+	//gtk_builder_add_from_file(builder, "tce.glade", NULL);
 	
 	window = GTK_WIDGET (gtk_builder_get_object (builder, "main_window"));
 	da_h_scrollbar = GTK_SCROLLBAR(gtk_builder_get_object (builder, "da_h_scrollbar"));
@@ -382,6 +409,8 @@ int main (int argc, char *argv[])
 	da = GTK_DRAWING_AREA (gtk_builder_get_object (builder, "da"));
 	aboutdialog = GTK_ABOUT_DIALOG (gtk_builder_get_object (builder, "aboutdialog"));
 	da_popup = GTK_MENU(gtk_builder_get_object (builder, "da_popup"));
+	tool_dialog = GTK_DIALOG(gtk_builder_get_object (builder, "tool_dialog"));
+		gtk_window_set_transient_for (GTK_WINDOW(tool_dialog), GTK_WINDOW(window));
 	
 	/* is there a description of the event masks??? */
 	// this can be set in glade
